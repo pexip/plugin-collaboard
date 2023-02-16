@@ -1,0 +1,1 @@
+export const collaboardApiUrl = 'https://api.collaboard.app';

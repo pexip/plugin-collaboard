@@ -1,8 +1,11 @@
-import {registerPlugin} from '@pexip/plugin-api';
+import { registerPlugin } from '@pexip/plugin-api';
+import { initializeHost } from './host';
+import { initializeGeneral } from './general';
 
 const plugin = await registerPlugin({
-    id: 'my-plugin',
-    version: 0,
+  id: 'collaboard',
+  version: 0,
 });
 
-await plugin.ui.showToast({message: 'Hello plugin world👋'});
+initializeHost(plugin);
+initializeGeneral(plugin);

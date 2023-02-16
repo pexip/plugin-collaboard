@@ -1,4 +1,4 @@
-# Plugin: Collaboard URL
+# Plugin: Collaboard for Web App 2
 
 Plugin that opens a URL with a whiteboard. The URL that it opens is https://web.collaboard.app/
 
