@@ -6,7 +6,7 @@ import { collaboardApiUrl } from "./constants";
  * @returns 
  */
 const getProjects = async (authToken: string) => {
-  const result = await fetch(`${collaboardApiUrl}/api/CollaborationHub/GetParticipatingProjecs`, {
+  const result = await fetch(`${collaboardApiUrl}/api/public/v1.0/CollaborationHub/GetMyProjects`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ const getProjects = async (authToken: string) => {
  * @returns JSON object with the new project.
  */
 const createProject = async (authToken: string, projectName: string) => {
-  const result = await fetch(`${collaboardApiUrl}/api/CollaborationHub/CreateProject`, {
+  const result = await fetch(`${collaboardApiUrl}/api/public/v1.0/CollaborationHub/CreateProject`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ const createProject = async (authToken: string, projectName: string) => {
  * @returns Empty promise.
  */
 const deleteProject = async (authToken: string, projectId: number) => {
-  const result = await fetch(`${collaboardApiUrl}/api/CollaborationHub/DeleteProject`, {
+  const result = await fetch(`${collaboardApiUrl}/api/public/v1.0/CollaborationHub/DeleteProject`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
