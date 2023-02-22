@@ -49,7 +49,7 @@ that start the whiteboard:
 
 Don't forget to uninstall or deactivate the extension after the demo.
 
-# How to use it
+## How to use it
 
 We will install all necessary dependencies with:
 
