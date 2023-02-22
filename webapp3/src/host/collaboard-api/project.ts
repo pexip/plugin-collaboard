@@ -51,7 +51,7 @@ const createProject = async (authToken: string, projectName: string) => {
     const jsonResult = await result.json();
     return jsonResult;
   }
-  throw Error('Cannot create a collaboard project')
+  throw Error('Cannot create a Collaboard project')
 }
 
 /**

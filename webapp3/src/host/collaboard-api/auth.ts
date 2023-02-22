@@ -22,13 +22,19 @@ const authenticateWithPassword = async (username: string, password: string) => {
     })
   });
   return result;
-  // if (result.status === 200 || result.status === 401) {
-  //   const jsonResponse = await result.json();
-  //   return jsonResponse;
-  // }
-  // throw Error('Cannot authenticate')
+}
+
+const authenticateWithRefreshToken = async (refreshToken: string) => {
+  const result = await fetch(`${collaboardApiUrl}/auth/api/Authorization/RefreshToken`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${refreshToken}`
+    }
+  });
+  return result;
 }
 
 export {
-  authenticateWithPassword
+  authenticateWithPassword,
+  authenticateWithRefreshToken
 }

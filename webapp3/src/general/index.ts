@@ -27,7 +27,13 @@ const showWhiteboardInvitation = async (link: string) => {
   prompt.onInput.add(async (result) => {
     await prompt.remove()
     if (result === primaryAction) {
-      window.open(link)
+      const w = 800;
+      const h = 800;
+      let left = (screen.width/2)-(w/2);
+      var top = (screen.height/2)-(h/2); 
+      window.open(link, 'Collaboard',
+        'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left)
+
     }
   })
 }

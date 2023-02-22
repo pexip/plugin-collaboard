@@ -1,7 +1,7 @@
 import { Plugin } from '@pexip/plugin-api';
 
 import {
-  authenticateWithPassword
+  authenticateWithPassword, authenticateWithRefreshToken
 } from './collaboard-api/auth';
 
 import {
@@ -60,10 +60,56 @@ const showStartWhiteboardConfirmation = async() => {
   prompt.onInput.add(async (result) => {
     await prompt.remove()
     if (result === primaryAction) {
-      showAuthenticationForm()
+      // Get all the info from the localStorage
+      refreshToken = localStorage.getItem('collaboard:refreshToken') ?? ''
+      username = localStorage.getItem('collaboard:username') ?? ''
+      if (refreshToken) {
+        showConfirmCredentialsPrompt(username);
+      } else {
+        showAuthenticationForm();
+      }
     }
   })
 };
+
+const showConfirmCredentialsPrompt = async (username: string) => {
+  const primaryAction = 'Confirm'
+  const prompt = await plugin.ui.addPrompt({
+    title: 'Confirm credentials',
+    description: `You are logged with the user "${username}". Do you want to continue?`,
+    prompt: {
+      primaryAction,
+      secondaryAction: 'Use other credentials'
+    }
+  })
+
+  prompt.onInput.add(async (result) => {
+    prompt.remove();
+    if (result === primaryAction) {
+      let response;
+      try {
+        response = await authenticateWithRefreshToken(refreshToken);
+      } catch (error) {
+        showCorsError();
+      }
+      if (response?.status === 200) {
+        const jsonResponse = await response.json()
+        authToken = jsonResponse.AuthorizationToken;
+        // Save all this info in the localStorage
+        localStorage.setItem('collaboard:refreshToken', refreshToken)
+        const project = await generateProject();
+        const link = await createInvitationLink(authToken, project.ProjectId);
+        await sendInvitationLink(link);
+        showSuccessPrompt(project.ProjectId); 
+      } else if (response?.status === 401) {
+        showWrongCredentials();
+        return;
+      }
+    } else {
+      showAuthenticationForm()
+    }
+  })
+}
 
 /***
  * Shows a form for introducing the username and password.
@@ -90,11 +136,8 @@ const showAuthenticationForm = async () => {
   form.onInput.add(async (formResult) => {
     form.remove();
     let response;
-    // await plugin.ui.showToast({message: 'Initializing whiteboard'});
     try {
       response = await authenticateWithPassword(formResult.username, formResult.password);
-      console.log()
-
     } catch (error) {
       showCorsError();
     }
@@ -103,6 +146,9 @@ const showAuthenticationForm = async () => {
       authToken = jsonResponse.AuthorizationToken;
       refreshToken = jsonResponse.RefreshToken;
       username = jsonResponse.User.UserName;
+      // Save all this info in the localStorage
+      localStorage.setItem('collaboard:refreshToken', refreshToken)
+      localStorage.setItem('collaboard:username', username)
       const project = await generateProject();
       const link = await createInvitationLink(authToken, project.ProjectId);
       await sendInvitationLink(link);
@@ -183,7 +229,12 @@ const showSuccessPrompt = async (projectId: number) => {
   prompt.onInput.add(async (result) => {
     await prompt.remove()
     if (result === primaryAction) {
-      window.open(`${collaboardWebUrl}/${projectId}`)
+      const w = 800;
+      const h = 800;
+      let left = (screen.width/2)-(w/2);
+      var top = (screen.height/2)-(h/2); 
+      window.open(`${collaboardWebUrl}/${projectId}`, 'Collaboard',
+        'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left)
     }
   })
 }
@@ -196,7 +247,7 @@ const showCorsError = async () => {
   const prompt = await plugin.ui.addPrompt({
     title: 'CORS error',
     description: 'Problem sending the credentials due a CORS problem.' +
-      'This is a PoC and you need to install the Chrome extension "CORS Unblock".' +
+      'This is a PoC and you need to install the Chrome extension "CORS Unblock". ' +
       'Do you want to try again?',
     prompt: {
       primaryAction,
