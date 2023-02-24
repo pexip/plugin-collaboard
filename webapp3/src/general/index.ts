@@ -1,19 +1,20 @@
 import { Plugin } from '@pexip/plugin-api';
 
 let plugin: Plugin;
+let whiteboardWindow: Window | null;
 
 const initializeGeneral = async (plugin_rcv: Plugin) => {
   plugin = plugin_rcv;
   plugin.events.applicationMessage.add((appMessage) => {
-    console.log(appMessage);
     if (appMessage.message.type === 'whiteboard-invitation') {
-      showWhiteboardInvitation(appMessage.message.data as string)
+      showWhiteboardInvitation(appMessage.message.data as string);
     }
   })
 }
 
 const showWhiteboardInvitation = async (link: string) => {
-  const primaryAction = 'Open'
+  const primaryAction = 'Open';
+  whiteboardWindow?.close();
   const prompt = await plugin.ui.addPrompt({
     title: 'Whiteboard invitation',
     description: 'You have received a whiteboard invitation. ' +
@@ -31,9 +32,8 @@ const showWhiteboardInvitation = async (link: string) => {
       const h = 800;
       let left = (screen.width/2)-(w/2);
       var top = (screen.height/2)-(h/2); 
-      window.open(link, 'Collaboard',
-        'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left)
-
+      whiteboardWindow = window.open(link, 'Collaboard',
+        'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
     }
   })
 }
