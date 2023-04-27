@@ -1,11 +1,10 @@
 import { Plugin } from '@pexip/plugin-api';
 
 let plugin: Plugin;
-let whiteboardWindow: Window | null;
 
 const initializeGeneral = async (plugin_rcv: Plugin) => {
   plugin = plugin_rcv;
-  plugin.events.applicationMessage.add((appMessage) => {
+  plugin.events.applicationMessage.add((appMessage: any) => {
     if (appMessage.message.type === 'whiteboard-invitation') {
       showWhiteboardInvitation(appMessage.message.data as string);
     }
@@ -14,26 +13,21 @@ const initializeGeneral = async (plugin_rcv: Plugin) => {
 
 const showWhiteboardInvitation = async (link: string) => {
   const primaryAction = 'Open';
-  whiteboardWindow?.close();
-  const prompt = await plugin.ui.addPrompt({
+  await plugin.ui.showPrompt({
     title: 'Whiteboard invitation',
     description: 'You have received a whiteboard invitation. ' +
       'Do you want to open the whiteboard in a new tab?',
     prompt: {
       primaryAction,
       secondaryAction: 'Cancel'
-    }
-  })
-
-  prompt.onInput.add(async (result) => {
-    await prompt.remove()
-    if (result === primaryAction) {
-      const w = 800;
-      const h = 800;
-      let left = (screen.width/2)-(w/2);
-      var top = (screen.height/2)-(h/2); 
-      whiteboardWindow = window.open(link, 'Collaboard',
-        'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+    },
+    opensPopup: {
+      id: 'open-collaboard-link',
+      openParams: [
+        link,
+        '',
+        'width=800,height=800'
+      ]
     }
   })
 }

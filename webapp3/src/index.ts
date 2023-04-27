@@ -9,3 +9,10 @@ const plugin = await registerPlugin({
 
 initializeHost(plugin);
 initializeGeneral(plugin);
+
+window.plugin.popupManager.add('open-collaboard-link', ctx => {
+  if (ctx.input === 'Open') {
+      return true;
+  }
+  return false;
+})
