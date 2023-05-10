@@ -1,9 +1,12 @@
 import { Plugin } from '@pexip/plugin-api';
+import { Config } from '../config';
 
 let plugin: Plugin;
+let config: Config;
 
-const initializeGeneral = async (plugin_rcv: Plugin) => {
+const initializeGeneral = async (plugin_rcv: Plugin, config_rcv: Config) => {
   plugin = plugin_rcv;
+  config = config_rcv;
   plugin.events.applicationMessage.add((appMessage: any) => {
     if (appMessage.message.type === 'whiteboard-invitation') {
       showWhiteboardInvitation(appMessage.message.data as string);
@@ -13,23 +16,41 @@ const initializeGeneral = async (plugin_rcv: Plugin) => {
 
 const showWhiteboardInvitation = async (link: string) => {
   const primaryAction = 'Open';
-  await plugin.ui.showPrompt({
-    title: 'Whiteboard invitation',
-    description: 'You have received a whiteboard invitation. ' +
-      'Do you want to open the whiteboard in a new tab?',
-    prompt: {
-      primaryAction,
-      secondaryAction: 'Cancel'
-    },
-    opensPopup: {
-      id: 'open-collaboard-link',
-      openParams: [
-        link,
-        '',
-        'width=800,height=800'
-      ]
-    }
-  })
+  if (config.infinityV31) {
+    const prompt = await plugin.ui.addPrompt({
+      title: 'Whiteboard invitation',
+      description: 'You have received a whiteboard invitation. ' +
+        'Do you want to open the whiteboard in a new tab?',
+      prompt: {
+        primaryAction,
+        secondaryAction: 'Cancel'
+      }
+    });
+
+    prompt.onInput.add(async (result: any) => {
+      await prompt.remove();
+      if (result === primaryAction) {
+        window.open(link, '', 'width=800,height=800');
+      }
+    });
+  } else {
+    await plugin.ui.showPrompt({
+      title: 'Whiteboard invitation',
+      description: 'You have received a whiteboard invitation.',
+      prompt: {
+        primaryAction,
+        // secondaryAction: 'Cancel'
+      },
+      opensPopup: {
+        id: 'open-collaboard-link',
+        openParams: [
+          link,
+          '',
+          'width=800,height=800'
+        ]
+      }
+    })
+  }
 }
 
 export {

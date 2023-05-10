@@ -1,5 +1,3 @@
-import { collaboardApiUrl } from "./constants";
-
 /**
  * Obtain an access token using for that the username and password.
  * @param username - The email that is used as username in collaboard.
@@ -7,8 +5,9 @@ import { collaboardApiUrl } from "./constants";
  * @returns The response with the AuthenticationToken, RefreshToken and username,
  *   between other things.
  */
-const authenticateWithPassword = async (username: string, password: string) => {
+const authenticateWithPassword = async (collaboardApiUrl: string, username: string, password: string) => {
   const token = btoa(username + ':' + password);
+  console.log(`${collaboardApiUrl}/auth/api/Authorization/Authenticate`)
   
   const result = await fetch(`${collaboardApiUrl}/auth/api/Authorization/Authenticate`, {
     method: 'POST',
@@ -24,7 +23,7 @@ const authenticateWithPassword = async (username: string, password: string) => {
   return result;
 }
 
-const authenticateWithRefreshToken = async (refreshToken: string) => {
+const authenticateWithRefreshToken = async (collaboardApiUrl: string, refreshToken: string) => {
   const result = await fetch(`${collaboardApiUrl}/auth/api/Authorization/RefreshToken`, {
     headers: {
       'Content-Type': 'application/json',

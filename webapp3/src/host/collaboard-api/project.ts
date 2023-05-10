@@ -1,11 +1,9 @@
-import { collaboardApiUrl } from "./constants";
-
 /**
  * Obtain all the available projects for the authenticated user.
  * @param authToken - Token that was obtained in the authentication process.
  * @returns 
  */
-const getProjects = async (authToken: string) => {
+const getProjects = async (collaboardApiUrl: string, authToken: string) => {
   const result = await fetch(`${collaboardApiUrl}/api/public/v1.0/CollaborationHub/GetMyProjects`, {
     method: 'POST',
     headers: {
@@ -33,7 +31,7 @@ const getProjects = async (authToken: string) => {
  * @param projectName - Name for the project that will be used in the description.
  * @returns JSON object with the new project.
  */
-const createProject = async (authToken: string, projectName: string) => {
+const createProject = async (collaboardApiUrl: string, authToken: string, projectName: string) => {
   const result = await fetch(`${collaboardApiUrl}/api/public/v1.0/CollaborationHub/CreateProject`, {
     method: 'POST',
     headers: {
@@ -60,7 +58,7 @@ const createProject = async (authToken: string, projectName: string) => {
  * @param projectId - Id of the project that we want to remove.
  * @returns Empty promise.
  */
-const deleteProject = async (authToken: string, projectId: number) => {
+const deleteProject = async (collaboardApiUrl: string, authToken: string, projectId: number) => {
   const result = await fetch(`${collaboardApiUrl}/api/public/v1.0/CollaborationHub/DeleteProject`, {
     method: 'POST',
     headers: {
@@ -85,7 +83,7 @@ const deleteProject = async (authToken: string, projectId: number) => {
  * @param projectId - Id of the project that we want to share.
  * @returns Invitation link in a string.
  */
-const createInvitationLink = async (authToken: string, projectId: number) => {
+const createInvitationLink = async (collaboardApiUrl: string, authToken: string, projectId: number, collaboardWebAppUrl: string) => {
   const result = await fetch(`${collaboardApiUrl}/api/CollaborationHub/CreateProjectInvitationLink`, {
     method: 'POST',
     headers: {
@@ -100,7 +98,7 @@ const createInvitationLink = async (authToken: string, projectId: number) => {
       "GuestPermission": 0,
       "ValidForMinutes": 60,
       "GuestIdentificationRequired": true,
-      "InvitationUrl": "https://web.collaboard.app/acceptProjectInvitation"
+      "InvitationUrl": `${collaboardWebAppUrl}/acceptProjectInvitation`
     })
   });
   if (result.status === 200) {
