@@ -1,12 +1,10 @@
 import { Plugin } from '@pexip/plugin-api';
-import { Config } from '../config';
+import { config } from '../config';
 
 let plugin: Plugin;
-let config: Config;
 
-const initializeGeneral = async (plugin_rcv: Plugin, config_rcv: Config) => {
+const initializeGeneral = async (plugin_rcv: Plugin) => {
   plugin = plugin_rcv;
-  config = config_rcv;
   plugin.events.applicationMessage.add((appMessage: any) => {
     if (appMessage.message.type === 'whiteboard-invitation') {
       showWhiteboardInvitation(appMessage.message.data as string);
