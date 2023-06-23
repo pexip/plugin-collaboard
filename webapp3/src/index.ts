@@ -11,7 +11,7 @@ initializeHost(plugin);
 initializeGeneral(plugin);
 
 window.plugin.popupManager.add('open-collaboard-link', ctx => {
-  if (ctx.input === 'Open') {
+  if (ctx.action === 'Open') {
       return true;
   }
   return false;

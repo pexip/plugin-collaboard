@@ -28,7 +28,7 @@ const showWhiteboardInvitation = async (link: string) => {
     prompt.onInput.add(async (result: any) => {
       await prompt.remove();
       if (result === primaryAction) {
-        window.open(link, '', 'width=800,height=800');
+        window.open(link, '', 'width=800,height=600');
       }
     });
   } else {
@@ -44,7 +44,7 @@ const showWhiteboardInvitation = async (link: string) => {
         openParams: [
           link,
           '',
-          'width=800,height=800'
+          'width=800,height=600'
         ]
       }
     })

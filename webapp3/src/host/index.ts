@@ -249,7 +249,7 @@ const showSuccessPrompt = async (link: string) => {
     prompt.onInput.add(async (result: any) => {
       await prompt.remove();
       if (result === primaryAction) {
-        window.open(link, '', 'width=800,height=800');
+        window.open(link, '', 'width=800,height=600');
       }
     });
 
@@ -266,7 +266,7 @@ const showSuccessPrompt = async (link: string) => {
         openParams: [
           link,
           '',
-          'width=800,height=800'
+          'width=800,height=600'
         ]
       }
     });
