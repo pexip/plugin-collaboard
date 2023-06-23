@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@pexip/plugin-api": "^17.5.1"
+    "@pexip/plugin-api": "17.6.1"
   },
   "devDependencies": {
     "prettier": "^2.7.1",
