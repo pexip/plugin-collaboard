@@ -13,6 +13,8 @@ const codeChallengeMethod = 'S256'
 
 let codeVerifier: string
 
+let accessToken: string | null = null
+
 export const handleAuthResponse = async (code: string): Promise<void> => {
   const formBody = new URLSearchParams()
 
@@ -56,4 +58,19 @@ export const getAuthUrl = async (): Promise<string> => {
 
   const authUrl = `${authorizeUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&code_challenge_method=${codeChallengeMethod}&code_challenge=${codeChallenge}&state=1234567890`
   return authUrl
+}
+
+export const getAccessToken = (): string | null => {
+  if (accessToken == null) {
+    accessToken = localStorage.getItem(LocalStorageKey.AccessToken)
+  }
+  return accessToken
+}
+
+export const logout = async (): Promise<void> => {
+  accessToken = null
+  localStorage.removeItem(LocalStorageKey.AccessToken)
+  localStorage.removeItem(LocalStorageKey.RefreshToken)
+  localStorage.removeItem(LocalStorageKey.ExpiresIn)
+  localStorage.removeItem(LocalStorageKey.TokenType)
 }
