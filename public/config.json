@@ -1,0 +1,6 @@
+{
+  "apiUrl": "https://test-api.collaboard.app",
+  "webappUrl": "https://test-web.collaboard.app",
+  "clientId": "74066737-271c-4b21-87e9-447b0472acf7",
+  "redirectUri": "https://localhost:5173/local-plugin/oauth-redirect"
+}

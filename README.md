@@ -1,7 +1,7 @@
 # Web App 3 Plugin: Collaboard
 
 This plugin enables the user to share whiteboard during the meetings with the
-rest of the participants
+rest of the participants.
 
 ## Requirements
 
@@ -9,7 +9,7 @@ In order to use this plugin, you need to comply with the following requirements:
 
 | Component      | Version |
 | -------------- | ------- |
-| Pexip Infinity | v35     |
+| Pexip Infinity | v36     |
 
 ## How to use
 
@@ -20,13 +20,26 @@ This plugin will create a new button in the interface.
 This plugin uses `oAuth` authentication and, to support this, we need to enable
 the redirections in the `manifest.json` file:
 
-```
+```json
 {
   "applicationConfig": {
     "handleOauthRedirects": true
     ...
   }
   ...
+}
+```
+
+## How to configure the plugin
+
+This plugin uses the `config.json` file to store the configuration. You can find
+the file in the `public` folder.
+
+```json
+{
+  "url": "<collaboard-url>",
+  "clientId": "<client_id-provisioned>",
+  "redirectUri": "<redirect-uri-after-login>"
 }
 ```
 

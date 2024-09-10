@@ -1,13 +1,16 @@
 import pkceChallenge from 'pkce-challenge'
-import { LocalStorageKey } from './LocalStorageKey'
+import { LocalStorageKey } from '../LocalStorageKey'
+import { getConfig } from '../config'
 
-const baseUrl = 'https://test-api.collaboard.app'
+const config = await getConfig()
+
+const baseUrl: string = config.apiUrl
+const clientId: string = config.clientId
+const redirectUri: string = config.redirectUri
 
 const authorizeUrl = `${baseUrl}/auth/oauth2/authorize`
 const tokenUrl = `${baseUrl}/auth/oauth2/token`
 
-const clientId = '74066737-271c-4b21-87e9-447b0472acf7'
-const redirectUri = 'https://localhost:5173/local-plugin/oauth-redirect'
 const responseType = 'code'
 const codeChallengeMethod = 'S256'
 
@@ -32,20 +35,21 @@ export const handleAuthResponse = async (code: string): Promise<void> => {
     body: formBody
   })
 
-  console.log(response)
   if (response.status === 200) {
     const data = await response.json()
-    const accessToken: string = data.access_token
+
+    const token: string = data.access_token
     const refreshToken: string = data.refresh_token
     const expiresIn: string = data.expires_in
     const tokenType: string = data.token_type
 
-    localStorage.setItem(LocalStorageKey.AccessToken, accessToken)
+    accessToken = data.access_token
+
+    localStorage.setItem(LocalStorageKey.AccessToken, token)
     localStorage.setItem(LocalStorageKey.RefreshToken, refreshToken)
     localStorage.setItem(LocalStorageKey.ExpiresIn, expiresIn)
     localStorage.setItem(LocalStorageKey.TokenType, tokenType)
   } else {
-    console.error('Failed to get access token')
     throw new Error('Failed to get access token')
   }
 }
@@ -67,10 +71,12 @@ export const getAccessToken = (): string | null => {
   return accessToken
 }
 
-export const logout = async (): Promise<void> => {
+export const logout = (): void => {
   accessToken = null
   localStorage.removeItem(LocalStorageKey.AccessToken)
   localStorage.removeItem(LocalStorageKey.RefreshToken)
   localStorage.removeItem(LocalStorageKey.ExpiresIn)
   localStorage.removeItem(LocalStorageKey.TokenType)
 }
+
+// TODO: Refresh token

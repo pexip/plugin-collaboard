@@ -23,6 +23,13 @@ export const OpenWhiteboardIcon: Icon = {
   hover: openIcon
 }
 
+const joinIcon =
+  '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="rgb(43, 64, 84)"><path d="M160-160q-33 0-56.5-23.5T80-240v-120h80v120h640v-480H160v120H80v-120q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm300-140-56-58 83-82H80v-80h407l-83-82 56-58 180 180-180 180Z"/></svg>'
+export const JoinWhiteboardIcon: Icon = {
+  main: joinIcon,
+  hover: joinIcon
+}
+
 const logoutIcon =
   '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="rgb(43, 64, 84)"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>'
 export const LogoutWhiteboardIcon: Icon = {

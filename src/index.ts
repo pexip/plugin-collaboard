@@ -1,78 +1,64 @@
 import { registerPlugin } from '@pexip/plugin-api'
-import { getAuthUrl, handleAuthResponse } from './auth'
-import {
-  CollaboardIcon,
-  LogoutWhiteboardIcon,
-  NewWhiteboardIcon,
-  OpenWhiteboardIcon
-} from './icons'
+import { handleAuthResponse } from './collaboard/auth'
+import { ButtonGroupId, setButtonGroup } from './buttonGroup'
+import { buttonPayload } from './buttonPayload'
+import { setAuthButton } from './authButton'
+import { setPlugin } from './plugin'
+import { getUserInfo } from './collaboard/user'
+import { createLogoutPrompt } from './prompts'
+import { createWhiteboardForm, openWhiteboardForm } from './forms'
 
 const plugin = await registerPlugin({
   id: 'plugin-collaboard',
   version: 0
 })
 
-/**
- * Pop-up Parameters
- */
-const authPopUpId = 'auth-collaboard'
-const authPopUpOpts =
-  'toolbar=0,scrollbars=1,status=1,resizable=1,location=1,menuBar=0,width=500,height=775,left=600,top=200'
+setPlugin(plugin)
 
-const authUrl = await getAuthUrl()
+const button = await plugin.ui.addButton(buttonPayload)
 
-const button = await plugin.ui.addButton({
-  position: 'toolbar',
-  icon: {
-    custom: CollaboardIcon
-  },
-  tooltip: 'Collaboard',
-  opensPopup: {
-    id: authPopUpId,
-    openParams: [authUrl, authPopUpId, authPopUpOpts]
+button.onClick.add(async (event) => {
+  switch (event.buttonId) {
+    case ButtonGroupId.New: {
+      await createWhiteboardForm()
+      break
+    }
+    case ButtonGroupId.Open: {
+      await openWhiteboardForm()
+      break
+    }
+    case ButtonGroupId.Join: {
+      break
+    }
+    case ButtonGroupId.Logout: {
+      await createLogoutPrompt()
+      setAuthButton(button)
+      break
+    }
   }
 })
 
-await button.update({
-  group: [
-    {
-      id: 'new',
-      position: 'toolbar',
-      icon: {
-        custom: NewWhiteboardIcon
-      },
-      tooltip: 'Create whiteboard'
-    },
-    {
-      id: 'open',
-      position: 'toolbar',
-      icon: {
-        custom: OpenWhiteboardIcon
-      },
-      tooltip: 'Open whiteboard'
-    },
-    {
-      id: 'logout',
-      position: 'toolbar',
-      icon: {
-        custom: LogoutWhiteboardIcon
-      },
-      tooltip: 'Logout Collaboard'
-    }
-  ],
-  position: 'toolbar',
-  icon: {
-    custom: CollaboardIcon
-  },
-  tooltip: 'Collaboard'
-})
+// Check if the user is authenticated
+try {
+  await getUserInfo()
+  setButtonGroup(button)
+} catch (e) {
+  setAuthButton(button)
+}
 
 window.addEventListener('message', (event) => {
-  if (event.data.code != null) {
-    console.log('Collaboard code:', event.data.code)
-    handleAuthResponse(event.data.code as string).catch(async (e) => {
-      console.error(e)
-      await plugin.ui.showToast({ message: e.message })
-    })
+  if (event.data.search != null) {
+    const search = new URLSearchParams(event.data.search as string)
+    const code = search.get('code')
+    if (code != null) {
+      handleAuthResponse(code)
+        .then(() => {
+          setButtonGroup(button)
+        })
+        .catch(async (e) => {
+          console.error(e)
+          await plugin.ui.showToast({ message: e.message })
+        })
+    }
   }
 })

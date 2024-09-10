@@ -15,9 +15,11 @@
   "type": "module",
   "dependencies": {
     "@pexip/plugin-api": "19.3.3",
-    "pkce-challenge": "^4.1.0"
+    "pkce-challenge": "^4.1.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
+    "@types/uuid": "^10.0.0",
     "eslint": "^8.1.0",
     "eslint-config-love": "^47.0.0",
     "eslint-config-prettier": "^9.1.0",
