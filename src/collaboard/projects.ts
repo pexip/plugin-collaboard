@@ -16,6 +16,8 @@ if (uuid == null) {
   uuid = newUuid
 }
 
+export let isSharing = false
+
 export const createProject = async (name: string): Promise<any> => {
   const token = getAccessToken()
 
@@ -76,13 +78,20 @@ export const getProjects = async (): Promise<any> => {
     throw new Error(errorMessage)
   } else {
     const data = await response.json()
-    const projects = data.Projects
+    const projects = data.Results
     return projects
   }
 }
 
-export const shareProject = async (projectId: string): Promise<string> => {
+export const shareProject = async (
+  projectId: string,
+  writable: boolean
+): Promise<string> => {
   const token = getAccessToken()
+
+  const MemberPermission = writable
+    ? 2 // ReadWrite
+    : 1 // ReadOnly
 
   const response = await fetch(
     `${baseUrl}/public/api/public/v2.0/collaborationhub/projects/${projectId}/invitationlink`,
@@ -94,7 +103,7 @@ export const shareProject = async (projectId: string): Promise<string> => {
       },
       body: JSON.stringify({
         UniqueDeviceId: uuid,
-        MemberPermission: 2, // ReadWrite
+        MemberPermission,
         ValidForMinutes: 60,
         InvitationUrl: `${webappUrl}/acceptProjectInvitation`
       })
@@ -113,7 +122,12 @@ export const shareProject = async (projectId: string): Promise<string> => {
     throw new Error(errorMessage)
   } else {
     const data = await response.json()
-    const invitationLink: string = data.InvitationLink
+    const invitationLink: string = data.InvitationUrl
+    isSharing = true
     return invitationLink
   }
+}
+
+export const stopSharingProject = async (): Promise<void> => {
+  isSharing = false
 }

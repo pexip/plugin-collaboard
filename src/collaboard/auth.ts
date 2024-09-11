@@ -1,6 +1,9 @@
 import pkceChallenge from 'pkce-challenge'
 import { LocalStorageKey } from '../LocalStorageKey'
 import { getConfig } from '../config'
+import { plugin } from '../plugin'
+import { updateButton } from '../button/button'
+import { getUserInfo } from './user'
 
 const config = await getConfig()
 
@@ -17,6 +20,8 @@ const codeChallengeMethod = 'S256'
 let codeVerifier: string
 
 let accessToken: string | null = null
+
+export let authenticated = false
 
 export const handleAuthResponse = async (code: string): Promise<void> => {
   const formBody = new URLSearchParams()
@@ -49,6 +54,10 @@ export const handleAuthResponse = async (code: string): Promise<void> => {
     localStorage.setItem(LocalStorageKey.RefreshToken, refreshToken)
     localStorage.setItem(LocalStorageKey.ExpiresIn, expiresIn)
     localStorage.setItem(LocalStorageKey.TokenType, tokenType)
+
+    authenticated = true
+
+    updateButton()
   } else {
     throw new Error('Failed to get access token')
   }
@@ -71,12 +80,35 @@ export const getAccessToken = (): string | null => {
   return accessToken
 }
 
+export const checkAuthenticated = async (): Promise<void> => {
+  try {
+    await getUserInfo()
+    authenticated = true
+  } catch (e) {
+    authenticated = false
+  }
+}
+
 export const logout = (): void => {
+  authenticated = false
   accessToken = null
   localStorage.removeItem(LocalStorageKey.AccessToken)
   localStorage.removeItem(LocalStorageKey.RefreshToken)
   localStorage.removeItem(LocalStorageKey.ExpiresIn)
   localStorage.removeItem(LocalStorageKey.TokenType)
 }
+
+window.addEventListener('message', (event) => {
+  if (event.data.search != null) {
+    const search = new URLSearchParams(event.data.search as string)
+    const code = search.get('code')
+    if (code != null) {
+      handleAuthResponse(code).catch(async (e) => {
+        console.error(e)
+        await plugin.ui.showToast({ message: e.message })
+      })
+    }
+  }
+})
 
 // TODO: Refresh token

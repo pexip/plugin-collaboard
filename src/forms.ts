@@ -1,9 +1,12 @@
+import { updateButton } from './button/button'
 import { createProject, getProjects, shareProject } from './collaboard/projects'
+import { sendInvitationLink } from './messages'
 import { plugin } from './plugin'
+import { showSharedWhiteboardPrompt } from './prompts'
 
-export const createWhiteboardForm = async (): Promise<void> => {
+export const showCreateWhiteboardForm = async (): Promise<void> => {
   const form = await plugin.ui.addForm({
-    title: 'Create whiteboard',
+    title: 'Create Whiteboard',
     description:
       'You will create a public whiteboard that will be accessible by anyone with the link.',
     form: {
@@ -11,8 +14,18 @@ export const createWhiteboardForm = async (): Promise<void> => {
         name: {
           name: 'Name',
           type: 'text',
-          required: true,
-          placeholder: 'Enter whiteboard name'
+          isOptional: false,
+          placeholder: 'Enter Name'
+        },
+        writable: {
+          name: 'Guest Permissions',
+          type: 'checklist',
+          options: [
+            {
+              id: 'writable',
+              label: 'Writable'
+            }
+          ]
         }
       },
       submitBtnTitle: 'Create'
@@ -31,17 +44,22 @@ export const createWhiteboardForm = async (): Promise<void> => {
     try {
       const project = await createProject(name)
       const projectId: string = project.ProjectId
-      const invitationLink = await shareProject(projectId)
+      const writable = false
+      const invitationLink = await shareProject(projectId, writable)
+      await sendInvitationLink(invitationLink)
+      await showSharedWhiteboardPrompt(invitationLink)
+      updateButton()
     } catch (error: any) {
       await plugin.ui.showToast({ message: error.message })
     }
   })
 }
 
-export const openWhiteboardForm = async (): Promise<void> => {
+export const showOpenWhiteboardForm = async (): Promise<void> => {
   let projects: any
   try {
-    const projects = await getProjects()
+    projects = await getProjects()
+    console.log(projects)
   } catch (error: any) {
     await plugin.ui.showToast({ message: error.message })
     return
@@ -58,6 +76,16 @@ export const openWhiteboardForm = async (): Promise<void> => {
             id: element.Project.ProjectId,
             label: element.Project.Description
           }))
+        },
+        writable: {
+          name: 'Guest permissions',
+          type: 'checklist',
+          options: [
+            {
+              id: 'writable',
+              label: 'Writable'
+            }
+          ]
         }
       },
       submitBtnTitle: 'Select'
@@ -68,7 +96,11 @@ export const openWhiteboardForm = async (): Promise<void> => {
     await form.remove()
     const projectId = event.project
     try {
-      const invitationLink = await shareProject(projectId)
+      const writable = false
+      const invitationLink = await shareProject(projectId, writable) // TODO: Save the invitation link in the project
+      await sendInvitationLink(invitationLink)
+      await showSharedWhiteboardPrompt(invitationLink)
+      updateButton()
     } catch (error: any) {
       await plugin.ui.showToast({ message: error.message })
     }
