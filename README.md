@@ -13,7 +13,63 @@ In order to use this plugin, you need to comply with the following requirements:
 
 ## How to use
 
-This plugin will create a new button in the interface.
+This plugin will create a new button in the interface. That will allow us to
+share a whiteboard with the rest of the participants.
+
+Once you click on the button, the first thing you will see is a button to log
+in:
+
+<div align='center'>
+
+![Login button](./images/login-button.png)
+
+</div>
+
+After you click on log in, you will see a new pop up window with a panel to log
+in with username/password and other social login options:
+
+<div align='center'>
+
+![Login pop up](./images/login.png)
+
+</div>
+
+Once you log in, you will see new buttons in the interface:
+
+<div align='center'>
+
+![Buttons](./images/buttons.png)
+
+</div>
+
+We have two main options to share a whiteboard:
+
+- **Create whiteboard**: This button will create a new whiteboard and share it
+  with the rest of participants.
+
+<div align='center'>
+
+![Create whiteboard](./images/create-whiteboard.png)
+
+</div>
+
+- **Open whiteboard**: This button will show a list of all available whiteboards
+  and share the selected one with the rest of participants.
+
+<div align='center'>
+
+![Open whiteboard](./images/open-whiteboard.png)
+
+</div>
+
+Once the user has created or open a whiteboard, the app will show a new window
+with the whiteboard:
+
+<div align='center'>
+
+![Whiteboard](./images/whiteboard.png)
+
+</div>
 
 ## How to configure the branding
 
@@ -37,7 +93,8 @@ the file in the `public` folder.
 
 ```json
 {
-  "url": "<collaboard-url>",
+  "apiUrl": "<collaboard-api-url>",
+  "webappUrl": "<collaboard-webapp-url>",
   "clientId": "<client_id-provisioned>",
   "redirectUri": "<redirect-uri-after-login>"
 }
