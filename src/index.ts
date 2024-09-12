@@ -1,8 +1,9 @@
 import { registerPlugin } from '@pexip/plugin-api'
 import { setPlugin } from './plugin'
-import { handleApplicationMessages } from './messages'
+import { handleApplicationMessages, notifySharingActive } from './messages'
 import { PopUpId } from './popUps'
 import { createButton } from './button/button'
+import { isSharing } from './collaboard/projects'
 
 const plugin = await registerPlugin({
   id: 'plugin-collaboard',
@@ -22,3 +23,9 @@ window.plugin.popupManager.add(PopUpId.Whiteboard, (input) => {
 })
 
 plugin.events.applicationMessage.add(handleApplicationMessages)
+plugin.events.participantJoined.add(async (event) => {
+  console.log('Participant joined', event.participant)
+  if (isSharing) {
+    await notifySharingActive(event.participant.uuid)
+  }
+})

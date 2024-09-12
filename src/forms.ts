@@ -17,7 +17,7 @@ export const showCreateWhiteboardForm = async (): Promise<void> => {
           isOptional: false,
           placeholder: 'Enter Name'
         },
-        writable: {
+        permissions: {
           name: 'Guest Permissions',
           type: 'checklist',
           options: [
@@ -40,11 +40,11 @@ export const showCreateWhiteboardForm = async (): Promise<void> => {
     }
 
     const name = event.name
+    const writable = event.permissions.writable
 
     try {
       const project = await createProject(name)
       const projectId: string = project.ProjectId
-      const writable = false
       const invitationLink = await shareProject(projectId, writable)
       await sendInvitationLink(invitationLink)
       await showSharedWhiteboardPrompt(invitationLink)
@@ -77,7 +77,7 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
             label: element.Project.Description
           }))
         },
-        writable: {
+        permissions: {
           name: 'Guest permissions',
           type: 'checklist',
           options: [
@@ -95,8 +95,8 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
   form.onInput.add(async (event) => {
     await form.remove()
     const projectId = event.project
+    const writable = event.permissions.writable
     try {
-      const writable = false
       const invitationLink = await shareProject(projectId, writable) // TODO: Save the invitation link in the project
       await sendInvitationLink(invitationLink)
       await showSharedWhiteboardPrompt(invitationLink)

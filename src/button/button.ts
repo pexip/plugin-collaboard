@@ -16,6 +16,7 @@ import { isSharing } from '../collaboard/projects'
 import { plugin } from '../plugin'
 import { authenticated, checkAuthenticated } from '../collaboard/auth'
 import {
+  showAnotherUserSharingPrompt,
   showLoginPrompt,
   showLogoutPrompt,
   showOpenWindowPrompt,
@@ -53,11 +54,19 @@ export const createButton = async (): Promise<void> => {
         break
       }
       case ButtonGroupId.CreateWhiteboard: {
-        await showCreateWhiteboardForm()
+        if (currentInvitationLink !== '') {
+          await showAnotherUserSharingPrompt(showCreateWhiteboardForm)
+        } else {
+          await showCreateWhiteboardForm()
+        }
         break
       }
       case ButtonGroupId.OpenWhiteboard: {
-        await showOpenWhiteboardForm()
+        if (currentInvitationLink !== '') {
+          await showAnotherUserSharingPrompt(showOpenWhiteboardForm)
+        } else {
+          await showOpenWhiteboardForm()
+        }
         break
       }
       case ButtonGroupId.OpenWindow: {
@@ -80,7 +89,6 @@ export const createButton = async (): Promise<void> => {
 }
 
 export const updateButton = (): void => {
-  console.log('Updating')
   button
     .update({
       group: getButtonGroup(),
@@ -100,7 +108,7 @@ const getButtonGroup = (): GroupButtonPayload[] => {
       icon: {
         custom: openWindowIcon
       },
-      tooltip: 'Open whiteboard'
+      tooltip: 'Open shared whiteboard'
     })
 
     if (isSharing) {
