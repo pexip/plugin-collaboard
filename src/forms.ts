@@ -8,7 +8,7 @@ export const showCreateWhiteboardForm = async (): Promise<void> => {
   const form = await plugin.ui.addForm({
     title: 'Create Whiteboard',
     description:
-      'You will create a public whiteboard that will be accessible by anyone with the link.',
+      'You are going to create a whiteboard and share it with the rest of the participants.',
     form: {
       elements: {
         name: {
@@ -68,6 +68,9 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
 
   const form = await plugin.ui.addForm({
     title: 'Open whiteboard',
+    description:
+      'You are going to open a whiteboard and share it with the rest of the participants.',
+
     form: {
       elements: {
         project: {

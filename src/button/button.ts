@@ -5,7 +5,8 @@ import {
   logoutIcon,
   loginIcon,
   collaboardIcon,
-  stopSharingIcon
+  stopSharingIcon,
+  manageWhiteboardsIcon
 } from './icons'
 import type {
   Button,
@@ -19,6 +20,7 @@ import {
   showAnotherUserSharingPrompt,
   showLoginPrompt,
   showLogoutPrompt,
+  showManageWhiteboardsPrompt,
   showOpenWindowPrompt,
   showStopSharingPrompt
 } from '../prompts'
@@ -29,6 +31,7 @@ export enum ButtonGroupId {
   Login = 'login',
   CreateWhiteboard = 'create-whiteboard',
   OpenWhiteboard = 'open-whiteboard',
+  ManageWhiteboards = 'manage-whiteboards',
   OpenWindow = 'open-window',
   StopSharing = 'stop-sharing',
   Logout = 'logout'
@@ -67,6 +70,10 @@ export const createButton = async (): Promise<void> => {
         } else {
           await showOpenWhiteboardForm()
         }
+        break
+      }
+      case ButtonGroupId.ManageWhiteboards: {
+        await showManageWhiteboardsPrompt()
         break
       }
       case ButtonGroupId.OpenWindow: {
@@ -141,6 +148,14 @@ const getButtonGroup = (): GroupButtonPayload[] => {
             custom: openWhiteboardIcon
           },
           tooltip: 'Open whiteboard'
+        },
+        {
+          id: ButtonGroupId.ManageWhiteboards,
+          position: 'toolbar',
+          icon: {
+            custom: manageWhiteboardsIcon
+          },
+          tooltip: 'Manage whiteboards'
         }
       )
     }

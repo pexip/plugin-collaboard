@@ -5,8 +5,13 @@ import { isSharing, stopSharingProject } from './collaboard/projects'
 import { currentInvitationLink, sendStopSharingMessage } from './messages'
 import { plugin } from './plugin'
 import { PopUpId, PopUpOpts } from './popUps'
+import { getConfig } from './config'
 
 let currentPrompt: Prompt | undefined
+
+const config = await getConfig()
+
+const webappUrl: string = config.webappUrl
 
 export const showLoginPrompt = async (): Promise<void> => {
   const authUrl = await getAuthUrl()
@@ -72,6 +77,32 @@ export const showReceivedInvitationPrompt = async (
     opensPopup: {
       id: PopUpId.Whiteboard,
       openParams: [invitationLink, PopUpId.Whiteboard, PopUpOpts.Whiteboard]
+    }
+  })
+
+  currentPrompt.onInput.add(async () => {
+    await currentPrompt?.remove()
+  })
+}
+
+export const showManageWhiteboardsPrompt = async (): Promise<void> => {
+  await currentPrompt?.remove()
+
+  currentPrompt = await plugin.ui.addPrompt({
+    title: 'Manage Whiteboards',
+    description:
+      'You are going to open a third-party website to manage your whiteboards.',
+    prompt: {
+      primaryAction: 'Open',
+      secondaryAction: 'Cancel'
+    },
+    opensPopup: {
+      id: PopUpId.Whiteboard,
+      openParams: [
+        `${webappUrl}/projects`,
+        PopUpId.ManageWhiteboards,
+        PopUpOpts.ManageWhiteboards
+      ]
     }
   })
 
