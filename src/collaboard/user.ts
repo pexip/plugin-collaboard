@@ -1,7 +1,6 @@
 import { getAccessToken } from './auth'
-import { getConfig } from '../config'
+import { config } from '../config'
 
-const config = await getConfig()
 const baseUrl: string = config.apiUrl
 
 export const getUserInfo = async (): Promise<any> => {

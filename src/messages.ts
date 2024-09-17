@@ -58,19 +58,19 @@ export const handleApplicationMessages = async (event: any): Promise<void> => {
     case MessageType.StartSharing: {
       currentInvitationLink = message.invitationLink
       await stopSharingProject()
-      updateButton()
+      await updateButton()
       await showReceivedInvitationPrompt(currentInvitationLink)
       break
     }
     case MessageType.SharingActive: {
       console.log('Sharing active')
       currentInvitationLink = message.invitationLink
-      updateButton()
+      await updateButton()
       break
     }
     case MessageType.StopSharing: {
       currentInvitationLink = ''
-      updateButton()
+      await updateButton()
       await showSharingStoppedPrompt()
       break
     }

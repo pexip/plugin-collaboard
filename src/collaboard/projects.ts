@@ -1,10 +1,8 @@
 import { getAccessToken } from './auth'
-import { getConfig } from '../config'
 import { LocalStorageKey } from '../LocalStorageKey'
 import { v4 as uuidv4 } from 'uuid'
 import { getErrorDescription } from './errorCodes'
-
-const config = await getConfig()
+import { config } from '../config'
 
 const baseUrl: string = config.apiUrl
 const webappUrl: string = config.webappUrl

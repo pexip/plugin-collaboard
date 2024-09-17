@@ -5,14 +5,6 @@ interface Config {
   redirectUri: string
 }
 
-let config: Config
+const response = await fetch('/config.json')
 
-export const getConfig = async (): Promise<Config> => {
-  if (config != null) {
-    return config
-  } else {
-    const response = await fetch('/config.json')
-    config = await response.json()
-    return config
-  }
-}
+export const config: Config = await response.json()

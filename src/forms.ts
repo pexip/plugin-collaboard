@@ -49,7 +49,7 @@ export const showCreateWhiteboardForm = async (): Promise<void> => {
       const invitationLink = await shareProject(projectId, writable)
       await sendInvitationLink(invitationLink)
       await showSharedWhiteboardPrompt(invitationLink)
-      updateButton()
+      await updateButton()
     } catch (error: any) {
       await plugin.ui.showToast({ message: error.message })
     }
@@ -100,7 +100,7 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
       const invitationLink = await shareProject(projectId, writable)
       await sendInvitationLink(invitationLink)
       await showSharedWhiteboardPrompt(invitationLink)
-      updateButton()
+      await updateButton()
     } catch (error: any) {
       await plugin.ui.showToast({ message: error.message })
     }

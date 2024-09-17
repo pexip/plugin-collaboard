@@ -1,11 +1,9 @@
 import pkceChallenge from 'pkce-challenge'
 import { LocalStorageKey } from '../LocalStorageKey'
-import { getConfig } from '../config'
 import { plugin } from '../plugin'
 import { updateButton } from '../button/button'
 import { getUserInfo } from './user'
-
-const config = await getConfig()
+import { config } from '../config'
 
 const baseUrl: string = config.apiUrl
 const clientId: string = config.clientId
@@ -57,7 +55,9 @@ export const handleAuthResponse = async (code: string): Promise<void> => {
 
     authenticated = true
 
-    updateButton()
+    await updateButton()
+
+    await plugin.ui.showToast({ message: 'Logged into Collaboard' })
   } else {
     throw new Error('Failed to get access token')
   }
@@ -89,13 +89,14 @@ export const checkAuthenticated = async (): Promise<void> => {
   }
 }
 
-export const logout = (): void => {
+export const logout = async (): Promise<void> => {
   authenticated = false
   accessToken = null
   localStorage.removeItem(LocalStorageKey.AccessToken)
   localStorage.removeItem(LocalStorageKey.RefreshToken)
   localStorage.removeItem(LocalStorageKey.ExpiresIn)
   localStorage.removeItem(LocalStorageKey.TokenType)
+  await plugin.ui.showToast({ message: 'Logged out from Collaboard' })
 }
 
 window.addEventListener('message', (event) => {

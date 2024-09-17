@@ -15,17 +15,23 @@ import type {
 } from '@pexip/plugin-api'
 import { isSharing } from '../collaboard/projects'
 import { plugin } from '../plugin'
-import { authenticated, checkAuthenticated } from '../collaboard/auth'
+import {
+  authenticated,
+  checkAuthenticated,
+  getAuthUrl
+} from '../collaboard/auth'
 import {
   showAnotherUserSharingPrompt,
-  showLoginPrompt,
+  // showLoginPrompt,
   showLogoutPrompt,
-  showManageWhiteboardsPrompt,
-  showOpenWindowPrompt,
+  // showManageWhiteboardsPrompt,
+  // showOpenWindowPrompt,
   showStopSharingPrompt
 } from '../prompts'
 import { showOpenWhiteboardForm, showCreateWhiteboardForm } from '../forms'
 import { currentInvitationLink } from '../messages'
+import { PopUpId, PopUpOpts } from '../popUps'
+import { config } from '../config'
 
 export enum ButtonGroupId {
   Login = 'login',
@@ -47,65 +53,46 @@ const baseButtonPayload: ToolbarButtonPayload = {
   tooltip: 'Collaboard'
 }
 
+const webappUrl: string = config.webappUrl
+
 export const createButton = async (): Promise<void> => {
   button = await plugin.ui.addButton(baseButtonPayload)
 
-  button.onClick.add(async (event) => {
-    switch (event.buttonId) {
-      case ButtonGroupId.Login: {
-        await showLoginPrompt()
-        break
-      }
-      case ButtonGroupId.CreateWhiteboard: {
-        if (currentInvitationLink !== '') {
-          await showAnotherUserSharingPrompt(showCreateWhiteboardForm)
-        } else {
-          await showCreateWhiteboardForm()
-        }
-        break
-      }
-      case ButtonGroupId.OpenWhiteboard: {
-        if (currentInvitationLink !== '') {
-          await showAnotherUserSharingPrompt(showOpenWhiteboardForm)
-        } else {
-          await showOpenWhiteboardForm()
-        }
-        break
-      }
-      case ButtonGroupId.ManageWhiteboards: {
-        await showManageWhiteboardsPrompt()
-        break
-      }
-      case ButtonGroupId.OpenWindow: {
-        await showOpenWindowPrompt()
-        break
-      }
-      case ButtonGroupId.StopSharing: {
-        await showStopSharingPrompt()
-        break
-      }
-      case ButtonGroupId.Logout: {
-        await showLogoutPrompt()
-        break
-      }
-    }
-  })
-
+  button.onClick.add(handleButtonClick)
   await checkAuthenticated()
-  updateButton()
+  await updateButton()
 }
 
-export const updateButton = (): void => {
+export const updateButton = async (): Promise<void> => {
   button
     .update({
-      group: getButtonGroup(),
+      group: await getButtonGroup(),
       isActive: currentInvitationLink !== '',
       ...baseButtonPayload
     })
     .catch(console.error)
 }
 
-const getButtonGroup = (): GroupButtonPayload[] => {
+const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
+  if (!authenticated) {
+    const authUrl = await getAuthUrl()
+
+    return [
+      {
+        id: ButtonGroupId.Login,
+        position: 'toolbar',
+        icon: {
+          custom: loginIcon
+        },
+        tooltip: 'Log in',
+        opensPopup: {
+          id: PopUpId.Auth,
+          openParams: [authUrl, PopUpId.Auth, PopUpOpts.Auth]
+        }
+      }
+    ]
+  }
+
   const group: GroupButtonPayload[] = []
 
   if (currentInvitationLink !== '') {
@@ -115,7 +102,15 @@ const getButtonGroup = (): GroupButtonPayload[] => {
       icon: {
         custom: openWindowIcon
       },
-      tooltip: 'Open shared whiteboard'
+      tooltip: 'Open shared whiteboard',
+      opensPopup: {
+        id: PopUpId.Whiteboard,
+        openParams: [
+          currentInvitationLink,
+          PopUpId.Whiteboard,
+          PopUpOpts.Whiteboard
+        ]
+      }
     })
 
     if (isSharing) {
@@ -130,54 +125,100 @@ const getButtonGroup = (): GroupButtonPayload[] => {
     }
   }
 
-  if (authenticated) {
-    if (!isSharing) {
-      group.push(
-        {
-          id: ButtonGroupId.CreateWhiteboard,
-          position: 'toolbar',
-          icon: {
-            custom: createWhiteboardIcon
-          },
-          tooltip: 'Create whiteboard'
+  if (!isSharing) {
+    group.push(
+      {
+        id: ButtonGroupId.CreateWhiteboard,
+        position: 'toolbar',
+        icon: {
+          custom: createWhiteboardIcon
         },
-        {
-          id: ButtonGroupId.OpenWhiteboard,
-          position: 'toolbar',
-          icon: {
-            custom: openWhiteboardIcon
-          },
-          tooltip: 'Open whiteboard'
+        tooltip: 'Create whiteboard'
+      },
+      {
+        id: ButtonGroupId.OpenWhiteboard,
+        position: 'toolbar',
+        icon: {
+          custom: openWhiteboardIcon
         },
-        {
-          id: ButtonGroupId.ManageWhiteboards,
-          position: 'toolbar',
-          icon: {
-            custom: manageWhiteboardsIcon
-          },
-          tooltip: 'Manage whiteboards'
+        tooltip: 'Open whiteboard'
+      },
+      {
+        id: ButtonGroupId.ManageWhiteboards,
+        position: 'toolbar',
+        icon: {
+          custom: manageWhiteboardsIcon
+        },
+        tooltip: 'Manage whiteboards',
+        opensPopup: {
+          id: PopUpId.ManageWhiteboards,
+          openParams: [
+            `${webappUrl}/projects`,
+            PopUpId.ManageWhiteboards,
+            PopUpOpts.ManageWhiteboards
+          ]
         }
-      )
-    }
-
-    group.push({
-      id: ButtonGroupId.Logout,
-      position: 'toolbar',
-      icon: {
-        custom: logoutIcon
-      },
-      tooltip: 'Log out'
-    })
-  } else {
-    group.push({
-      id: ButtonGroupId.Login,
-      position: 'toolbar',
-      icon: {
-        custom: loginIcon
-      },
-      tooltip: 'Log in'
-    })
+      }
+    )
   }
 
+  group.push({
+    id: ButtonGroupId.Logout,
+    position: 'toolbar',
+    icon: {
+      custom: logoutIcon
+    },
+    tooltip: 'Log out'
+  })
+
   return group
+}
+
+const handleButtonClick = async (event: {
+  buttonId: string
+}): Promise<void> => {
+  switch (event.buttonId) {
+    case ButtonGroupId.Login: {
+      focusPopUp(PopUpId.Auth)
+      break
+    }
+    case ButtonGroupId.CreateWhiteboard: {
+      if (currentInvitationLink !== '') {
+        await showAnotherUserSharingPrompt(showCreateWhiteboardForm)
+      } else {
+        await showCreateWhiteboardForm()
+      }
+      break
+    }
+    case ButtonGroupId.OpenWhiteboard: {
+      if (currentInvitationLink !== '') {
+        await showAnotherUserSharingPrompt(showOpenWhiteboardForm)
+      } else {
+        await showOpenWhiteboardForm()
+      }
+      break
+    }
+    case ButtonGroupId.ManageWhiteboards: {
+      focusPopUp(PopUpId.ManageWhiteboards)
+      break
+    }
+    case ButtonGroupId.OpenWindow: {
+      focusPopUp(PopUpId.Whiteboard)
+      break
+    }
+    case ButtonGroupId.StopSharing: {
+      await showStopSharingPrompt()
+      break
+    }
+    case ButtonGroupId.Logout: {
+      await showLogoutPrompt()
+      break
+    }
+  }
+}
+
+const focusPopUp = (id: string): void => {
+  setTimeout(() => {
+    window.plugin.popupManager.get(id)?.focus()
+  }, 0)
 }
