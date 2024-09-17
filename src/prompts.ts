@@ -4,7 +4,7 @@ import { logout } from './collaboard/auth'
 import { isSharing, stopSharingProject } from './collaboard/projects'
 import { sendStopSharingMessage } from './messages'
 import { plugin } from './plugin'
-import { PopUpId, PopUpOpts } from './popUps'
+import { closePopUp, PopUpId, PopUpOpts } from './popUps'
 
 let currentPrompt: Prompt | undefined
 
@@ -76,6 +76,8 @@ export const showStopSharingPrompt = async (): Promise<void> => {
       await stopSharingProject()
       await sendStopSharingMessage()
       await updateButton()
+      closePopUp(PopUpId.Whiteboard)
+      await plugin.ui.showToast({ message: 'Whiteboard sharing stopped' })
     }
   })
 }
@@ -92,6 +94,7 @@ export const showSharingStoppedPrompt = async (): Promise<void> => {
   })
 
   currentPrompt.onInput.add(async () => {
+    closePopUp(PopUpId.Whiteboard)
     await currentPrompt?.remove()
   })
 }
@@ -144,6 +147,8 @@ export const showLogoutPrompt = async (): Promise<void> => {
         await stopSharingProject()
         await sendStopSharingMessage()
       }
+      closePopUp(PopUpId.Whiteboard)
+      closePopUp(PopUpId.ManageWhiteboards)
       await updateButton()
     }
   })

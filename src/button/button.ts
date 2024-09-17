@@ -22,15 +22,12 @@ import {
 } from '../collaboard/auth'
 import {
   showAnotherUserSharingPrompt,
-  // showLoginPrompt,
   showLogoutPrompt,
-  // showManageWhiteboardsPrompt,
-  // showOpenWindowPrompt,
   showStopSharingPrompt
 } from '../prompts'
 import { showOpenWhiteboardForm, showCreateWhiteboardForm } from '../forms'
 import { currentInvitationLink } from '../messages'
-import { PopUpId, PopUpOpts } from '../popUps'
+import { focusPopUp, PopUpId, PopUpOpts } from '../popUps'
 import { config } from '../config'
 
 export enum ButtonGroupId {
@@ -215,10 +212,4 @@ const handleButtonClick = async (event: {
       break
     }
   }
-}
-
-const focusPopUp = (id: string): void => {
-  setTimeout(() => {
-    window.plugin.popupManager.get(id)?.focus()
-  }, 0)
 }
