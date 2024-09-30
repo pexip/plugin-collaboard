@@ -88,8 +88,9 @@ the redirections in the `manifest.json` file:
 
 ## How to configure the plugin
 
-This plugin uses the `config.json` file to store the configuration. You can find
-the file in the `public` folder.
+This plugin uses the `config.json` file to store the configuration. You should
+create the file in the `public` folder in your are developing or in the root of
+folder of your plugin, if you are creating a package.
 
 ```json
 {
