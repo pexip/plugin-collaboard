@@ -71,25 +71,6 @@ export const updateButton = async (): Promise<void> => {
 }
 
 const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
-  if (!authenticated) {
-    const authUrl = await getAuthUrl()
-
-    return [
-      {
-        id: ButtonGroupId.Login,
-        position: 'toolbar',
-        icon: {
-          custom: loginIcon
-        },
-        tooltip: 'Log in',
-        opensPopup: {
-          id: PopUpId.Auth,
-          openParams: [authUrl, PopUpId.Auth, PopUpOpts.Auth]
-        }
-      }
-    ]
-  }
-
   const group: GroupButtonPayload[] = []
 
   if (currentInvitationLink !== '') {
@@ -122,51 +103,68 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
     }
   }
 
-  if (!isSharing) {
-    group.push(
-      {
-        id: ButtonGroupId.CreateWhiteboard,
-        position: 'toolbar',
-        icon: {
-          custom: createWhiteboardIcon
+  if (authenticated) {
+    if (!isSharing) {
+      group.push(
+        {
+          id: ButtonGroupId.CreateWhiteboard,
+          position: 'toolbar',
+          icon: {
+            custom: createWhiteboardIcon
+          },
+          tooltip: 'Create whiteboard'
         },
-        tooltip: 'Create whiteboard'
-      },
-      {
-        id: ButtonGroupId.OpenWhiteboard,
-        position: 'toolbar',
-        icon: {
-          custom: openWhiteboardIcon
+        {
+          id: ButtonGroupId.OpenWhiteboard,
+          position: 'toolbar',
+          icon: {
+            custom: openWhiteboardIcon
+          },
+          tooltip: 'Open whiteboard'
         },
-        tooltip: 'Open whiteboard'
-      },
-      {
-        id: ButtonGroupId.ManageWhiteboards,
-        position: 'toolbar',
-        icon: {
-          custom: manageWhiteboardsIcon
-        },
-        tooltip: 'Manage whiteboards',
-        opensPopup: {
-          id: PopUpId.ManageWhiteboards,
-          openParams: [
-            `${webappUrl}/projects`,
-            PopUpId.ManageWhiteboards,
-            PopUpOpts.ManageWhiteboards
-          ]
+        {
+          id: ButtonGroupId.ManageWhiteboards,
+          position: 'toolbar',
+          icon: {
+            custom: manageWhiteboardsIcon
+          },
+          tooltip: 'Manage whiteboards',
+          opensPopup: {
+            id: PopUpId.ManageWhiteboards,
+            openParams: [
+              `${webappUrl}/projects`,
+              PopUpId.ManageWhiteboards,
+              PopUpOpts.ManageWhiteboards
+            ]
+          }
         }
-      }
-    )
-  }
+      )
+    }
 
-  group.push({
-    id: ButtonGroupId.Logout,
-    position: 'toolbar',
-    icon: {
-      custom: logoutIcon
-    },
-    tooltip: 'Log out'
-  })
+    group.push({
+      id: ButtonGroupId.Logout,
+      position: 'toolbar',
+      icon: {
+        custom: logoutIcon
+      },
+      tooltip: 'Log out'
+    })
+  } else {
+    const authUrl = await getAuthUrl()
+
+    group.push({
+      id: ButtonGroupId.Login,
+      position: 'toolbar',
+      icon: {
+        custom: loginIcon
+      },
+      tooltip: 'Log in',
+      opensPopup: {
+        id: PopUpId.Auth,
+        openParams: [authUrl, PopUpId.Auth, PopUpOpts.Auth]
+      }
+    })
+  }
 
   return group
 }
