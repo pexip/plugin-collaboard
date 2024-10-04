@@ -77,7 +77,7 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
           name: 'Select whiteboard',
           type: 'select',
           options: projects.map((element: any) => ({
-            id: element.Project.ProjectId,
+            id: element.Project.ProjectId.toString(),
             label: element.Project.Description
           }))
         }
