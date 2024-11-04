@@ -1,9 +1,0 @@
-{
-  "plugins": [
-    {
-      "id": "plugin-collaboard-url",
-      "srcURL": "plugins/collaboard-url/plugin.json",
-      "enabled": true
-    }
-  ]
-}
