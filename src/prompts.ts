@@ -1,17 +1,19 @@
-import { type Prompt } from '@pexip/plugin-api'
+import type { Prompt } from '@pexip/plugin-api'
 import { updateButton } from './button/button'
 import { logout } from './collaboard/auth'
 import { isSharing, stopSharingProject } from './collaboard/projects'
 import { sendStopSharingMessage } from './messages'
-import { plugin } from './plugin'
+import { getPlugin } from './plugin'
 import { closePopUp, PopUpId, PopUpOpts } from './popUps'
 
-let currentPrompt: Prompt | undefined
+let currentPrompt: Prompt | null = null
 
 export const showSharedWhiteboardPrompt = async (
   invitationLink: string
 ): Promise<void> => {
   await currentPrompt?.remove()
+
+  const plugin = getPlugin()
 
   currentPrompt = await plugin.ui.addPrompt({
     title: 'Whiteboard Shared',
@@ -23,7 +25,7 @@ export const showSharedWhiteboardPrompt = async (
     },
     opensPopup: {
       id: PopUpId.Whiteboard,
-      openParams: [invitationLink, PopUpId.Whiteboard, PopUpOpts.Whiteboard]
+      openParams: [invitationLink, PopUpId.Whiteboard, PopUpOpts.Default]
     }
   })
 
@@ -37,6 +39,8 @@ export const showReceivedInvitationPrompt = async (
 ): Promise<void> => {
   await currentPrompt?.remove()
 
+  const plugin = getPlugin()
+
   currentPrompt = await plugin.ui.addPrompt({
     title: 'Whiteboard Invitation',
     description:
@@ -47,7 +51,7 @@ export const showReceivedInvitationPrompt = async (
     },
     opensPopup: {
       id: PopUpId.Whiteboard,
-      openParams: [invitationLink, PopUpId.Whiteboard, PopUpOpts.Whiteboard]
+      openParams: [invitationLink, PopUpId.Whiteboard, PopUpOpts.Default]
     }
   })
 
@@ -61,6 +65,8 @@ export const showStopSharingPrompt = async (): Promise<void> => {
 
   await currentPrompt?.remove()
 
+  const plugin = getPlugin()
+
   currentPrompt = await plugin.ui.addPrompt({
     title: 'Stop Sharing',
     description: 'Do you want to stop sharing the whiteboard?',
@@ -73,7 +79,7 @@ export const showStopSharingPrompt = async (): Promise<void> => {
   currentPrompt.onInput.add(async (event) => {
     await currentPrompt?.remove()
     if (event === primaryAction) {
-      await stopSharingProject()
+      stopSharingProject()
       await sendStopSharingMessage()
       await updateButton()
       closePopUp(PopUpId.Whiteboard)
@@ -84,6 +90,8 @@ export const showStopSharingPrompt = async (): Promise<void> => {
 
 export const showSharingStoppedPrompt = async (): Promise<void> => {
   await currentPrompt?.remove()
+
+  const plugin = getPlugin()
 
   currentPrompt = await plugin.ui.addPrompt({
     title: 'Sharing Stopped',
@@ -105,6 +113,8 @@ export const showAnotherUserSharingPrompt = async (
   const primaryAction = 'Continue'
 
   await currentPrompt?.remove()
+
+  const plugin = getPlugin()
 
   currentPrompt = await plugin.ui.addPrompt({
     title: 'Another user is sharing',
@@ -129,6 +139,8 @@ export const showLogoutPrompt = async (): Promise<void> => {
 
   await currentPrompt?.remove()
 
+  const plugin = getPlugin()
+
   currentPrompt = await plugin.ui.addPrompt({
     title: 'Log out',
     description:
@@ -144,7 +156,7 @@ export const showLogoutPrompt = async (): Promise<void> => {
     if (event === primaryAction) {
       await logout()
       if (isSharing) {
-        await stopSharingProject()
+        stopSharingProject()
         await sendStopSharingMessage()
       }
       closePopUp(PopUpId.Whiteboard)

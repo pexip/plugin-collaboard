@@ -1,10 +1,14 @@
 import { updateButton } from './button/button'
 import { createProject, getProjects, shareProject } from './collaboard/projects'
+import { logger } from './logger'
 import { sendInvitationLink } from './messages'
-import { plugin } from './plugin'
+import { getPlugin } from './plugin'
 import { showSharedWhiteboardPrompt } from './prompts'
+import type { ProjectInfo } from './types/ProjectInfo'
 
 export const showCreateWhiteboardForm = async (): Promise<void> => {
+  const plugin = getPlugin()
+
   const form = await plugin.ui.addForm({
     title: 'Create Whiteboard',
     description:
@@ -35,34 +39,34 @@ export const showCreateWhiteboardForm = async (): Promise<void> => {
   form.onInput.add(async (event) => {
     await form.remove()
 
-    const name = event.name
+    const { name } = event
 
-    if (name == null) {
-      return
-    }
-
-    const writable = event.permissions.writable
+    const { permissions } = event
+    const { writable } = permissions
 
     try {
-      const project = await createProject(name)
-      const projectId: string = project.ProjectId
+      const projectId = await createProject(name)
       const invitationLink = await shareProject(projectId, writable)
       await sendInvitationLink(invitationLink)
       await showSharedWhiteboardPrompt(invitationLink)
       await updateButton()
-    } catch (error: any) {
-      await plugin.ui.showToast({ message: error.message })
+    } catch (e: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- error is an Error
+      await plugin.ui.showToast({ message: (e as Error).message })
     }
   })
 }
 
 export const showOpenWhiteboardForm = async (): Promise<void> => {
-  let projects: any
+  let projects: ProjectInfo[] = []
+  const plugin = getPlugin()
+
   try {
     projects = await getProjects()
-    console.log(projects)
-  } catch (error: any) {
-    await plugin.ui.showToast({ message: error.message })
+    logger.info(projects)
+  } catch (e: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- error is an Error
+    await plugin.ui.showToast({ message: (e as Error).message })
     return
   }
 
@@ -76,10 +80,11 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
         project: {
           name: 'Select whiteboard',
           type: 'select',
-          options: projects.map((element: any) => ({
-            id: element.Project.ProjectId.toString(),
-            label: element.Project.Description
-          }))
+          options: projects.map((project: ProjectInfo) => {
+            const { Project } = project
+            const { ProjectId: id, Description: label } = Project
+            return { id, label }
+          })
         }
       },
       submitBtnTitle: 'Select'
@@ -89,20 +94,17 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
   form.onInput.add(async (event) => {
     await form.remove()
 
-    const projectId = event.project
-
-    if (projectId == null) {
-      return
-    }
+    const { project: projectId } = event
 
     try {
       const writable = false
-      const invitationLink = await shareProject(projectId, writable)
+      const invitationLink = await shareProject(Number(projectId), writable)
       await sendInvitationLink(invitationLink)
       await showSharedWhiteboardPrompt(invitationLink)
       await updateButton()
-    } catch (error: any) {
-      await plugin.ui.showToast({ message: error.message })
+    } catch (e: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- error is an Error
+      await plugin.ui.showToast({ message: (e as Error).message })
     }
   })
 }
