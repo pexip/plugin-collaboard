@@ -103,7 +103,7 @@ export const shareProject = async (
         UniqueDeviceId: uuid,
         MemberPermission,
         ValidForMinutes: 60,
-        InvitationUrl: `${webappUrl}/acceptProjectInvitation`
+        InvitationUrl: `${webappUrl}/share`
       })
     }
   )
