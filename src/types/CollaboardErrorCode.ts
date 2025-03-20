@@ -1,20 +1,4 @@
-export const getErrorDescription = (code: number): string => {
-  let description = ErrorCodes[code] + '.'
-  description = insertSpaceBetweenWords(description)
-  description = description.toLowerCase()
-  description = capitalizeFirstLetter(description)
-  return description
-}
-
-const insertSpaceBetweenWords = (str: string): string => {
-  return str.replace(/([A-Z]+)/g, ' $1').trim()
-}
-
-const capitalizeFirstLetter = (str: string): string => {
-  return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-enum ErrorCodes {
+export enum CollaboardErrorCode {
   None = 0,
   Maintenance = 1,
   AppIdNotValid = 2,

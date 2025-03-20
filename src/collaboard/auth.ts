@@ -1,9 +1,11 @@
 import pkceChallenge from 'pkce-challenge'
 import { LocalStorageKey } from '../LocalStorageKey'
-import { plugin } from '../plugin'
+import { getPlugin } from '../plugin'
 import { updateButton } from '../button/button'
 import { getUserInfo } from './user'
 import { config } from '../config'
+import { logger } from '../logger'
+import { HttpStatusCode } from '../types/HttpStatusCode'
 
 const baseUrl: string = config.apiUrl
 const clientId: string = config.clientId
@@ -15,14 +17,13 @@ const tokenUrl = `${baseUrl}/auth/oauth2/token`
 const responseType = 'code'
 const codeChallengeMethod = 'S256'
 
-let codeVerifier: string
-
-let accessToken: string | null = null
+let codeVerifier = ''
 
 export let authenticated = false
 
 export const handleAuthResponse = async (code: string): Promise<void> => {
   const formBody = new URLSearchParams()
+  const plugin = getPlugin()
 
   formBody.append('client_id', clientId)
   formBody.append('grant_type', 'authorization_code')
@@ -38,15 +39,19 @@ export const handleAuthResponse = async (code: string): Promise<void> => {
     body: formBody
   })
 
-  if (response.status === 200) {
-    const data = await response.json()
+  if (response.status === Number(HttpStatusCode.Ok)) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
+    const data = (await response.json()) as {
+      access_token: string
+      refresh_token: string
+      expires_in: string
+      token_type: string
+    }
 
     const token: string = data.access_token
     const refreshToken: string = data.refresh_token
     const expiresIn: string = data.expires_in
     const tokenType: string = data.token_type
-
-    accessToken = data.access_token
 
     localStorage.setItem(LocalStorageKey.AccessToken, token)
     localStorage.setItem(LocalStorageKey.RefreshToken, refreshToken)
@@ -73,12 +78,8 @@ export const getAuthUrl = async (): Promise<string> => {
   return authUrl
 }
 
-export const getAccessToken = (): string | null => {
-  if (accessToken == null) {
-    accessToken = localStorage.getItem(LocalStorageKey.AccessToken)
-  }
-  return accessToken
-}
+export const getAccessToken = (): string | null =>
+  localStorage.getItem(LocalStorageKey.AccessToken)
 
 export const checkAuthenticated = async (): Promise<void> => {
   try {
@@ -91,25 +92,32 @@ export const checkAuthenticated = async (): Promise<void> => {
 
 export const logout = async (): Promise<void> => {
   authenticated = false
-  accessToken = null
+  const plugin = getPlugin()
+
   localStorage.removeItem(LocalStorageKey.AccessToken)
   localStorage.removeItem(LocalStorageKey.RefreshToken)
   localStorage.removeItem(LocalStorageKey.ExpiresIn)
   localStorage.removeItem(LocalStorageKey.TokenType)
+
   await plugin.ui.showToast({ message: 'Logged out from Collaboard' })
 }
 
-window.addEventListener('message', (event) => {
-  if (event.data.search != null) {
-    const search = new URLSearchParams(event.data.search as string)
-    const code = search.get('code')
-    if (code != null) {
-      handleAuthResponse(code).catch(async (e) => {
-        console.error(e)
-        await plugin.ui.showToast({ message: e.message })
-      })
+window.addEventListener(
+  'message',
+  (event: { data: { search: string | null } }) => {
+    if (event.data.search != null) {
+      const search = new URLSearchParams(event.data.search)
+      const code = search.get('code')
+      if (code != null) {
+        handleAuthResponse(code).catch(async (e: unknown) => {
+          logger.error(e)
+          const plugin = getPlugin()
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- error is an Error
+          await plugin.ui.showToast({ message: (e as Error).message })
+        })
+      }
     }
   }
-})
+)
 
 // TODO: Refresh token

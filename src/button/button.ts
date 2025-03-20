@@ -14,7 +14,7 @@ import type {
   ToolbarButtonPayload
 } from '@pexip/plugin-api'
 import { isSharing } from '../collaboard/projects'
-import { plugin } from '../plugin'
+import { getPlugin } from '../plugin'
 import {
   authenticated,
   checkAuthenticated,
@@ -29,6 +29,7 @@ import { showOpenWhiteboardForm, showCreateWhiteboardForm } from '../forms'
 import { currentInvitationLink } from '../messages'
 import { focusPopUp, PopUpId, PopUpOpts } from '../popUps'
 import { config } from '../config'
+import { logger } from '../logger'
 
 export enum ButtonGroupId {
   Login = 'login',
@@ -40,7 +41,7 @@ export enum ButtonGroupId {
   Logout = 'logout'
 }
 
-let button: Button<'toolbar'>
+let button: Button<'toolbar'> | null = null
 
 const baseButtonPayload: ToolbarButtonPayload = {
   position: 'toolbar',
@@ -53,6 +54,8 @@ const baseButtonPayload: ToolbarButtonPayload = {
 const webappUrl: string = config.webappUrl
 
 export const createButton = async (): Promise<void> => {
+  const plugin = getPlugin()
+
   button = await plugin.ui.addButton(baseButtonPayload)
 
   button.onClick.add(handleButtonClick)
@@ -62,12 +65,12 @@ export const createButton = async (): Promise<void> => {
 
 export const updateButton = async (): Promise<void> => {
   button
-    .update({
+    ?.update({
       group: await getButtonGroup(),
       isActive: currentInvitationLink !== '',
       ...baseButtonPayload
     })
-    .catch(console.error)
+    .catch(logger.error)
 }
 
 const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
@@ -76,7 +79,6 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
   if (currentInvitationLink !== '') {
     group.push({
       id: ButtonGroupId.OpenWindow,
-      position: 'toolbar',
       icon: {
         custom: openWindowIcon
       },
@@ -86,7 +88,7 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
         openParams: [
           currentInvitationLink,
           PopUpId.Whiteboard,
-          PopUpOpts.Whiteboard
+          PopUpOpts.Default
         ]
       }
     })
@@ -94,7 +96,6 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
     if (isSharing) {
       group.push({
         id: ButtonGroupId.StopSharing,
-        position: 'toolbar',
         icon: {
           custom: stopSharingIcon
         },
@@ -108,7 +109,6 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
       group.push(
         {
           id: ButtonGroupId.CreateWhiteboard,
-          position: 'toolbar',
           icon: {
             custom: createWhiteboardIcon
           },
@@ -116,7 +116,6 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
         },
         {
           id: ButtonGroupId.OpenWhiteboard,
-          position: 'toolbar',
           icon: {
             custom: openWhiteboardIcon
           },
@@ -124,7 +123,6 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
         },
         {
           id: ButtonGroupId.ManageWhiteboards,
-          position: 'toolbar',
           icon: {
             custom: manageWhiteboardsIcon
           },
@@ -134,7 +132,7 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
             openParams: [
               `${webappUrl}/projects`,
               PopUpId.ManageWhiteboards,
-              PopUpOpts.ManageWhiteboards
+              PopUpOpts.Default
             ]
           }
         }
@@ -143,7 +141,6 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
 
     group.push({
       id: ButtonGroupId.Logout,
-      position: 'toolbar',
       icon: {
         custom: logoutIcon
       },
@@ -154,7 +151,6 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
 
     group.push({
       id: ButtonGroupId.Login,
-      position: 'toolbar',
       icon: {
         custom: loginIcon
       },
@@ -172,7 +168,9 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
 const handleButtonClick = async (event: {
   buttonId: string
 }): Promise<void> => {
-  switch (event.buttonId) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- buttonId is a string
+  const buttonId = event.buttonId as ButtonGroupId
+  switch (buttonId) {
     case ButtonGroupId.Login: {
       focusPopUp(PopUpId.Auth)
       break

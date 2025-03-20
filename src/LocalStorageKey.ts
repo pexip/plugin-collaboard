@@ -1,9 +1,7 @@
-const prefix = 'pexip-collaboard-'
-
 export enum LocalStorageKey {
-  Uuid = `${prefix}uuid`,
-  AccessToken = `${prefix}access-token`,
-  RefreshToken = `${prefix}refresh-token`,
-  ExpiresIn = `${prefix}expires-in`,
-  TokenType = `${prefix}token-type`
+  Uuid = 'pexip-collaboard-uuid',
+  AccessToken = 'pexip-collaboard-access-token',
+  RefreshToken = 'pexip-collaboard-refresh-token',
+  ExpiresIn = 'pexip-collaboard-expires-in',
+  TokenType = 'pexip-collaboard-token-type'
 }
