@@ -1,23 +1,22 @@
+import type { ApplicationMessage } from '@pexip/plugin-api'
 import { updateButton } from './button/button'
 import { stopSharingProject } from './collaboard/projects'
-import { plugin } from './plugin'
+import { logger } from './logger'
+import { getPlugin } from './plugin'
 import {
   showReceivedInvitationPrompt,
   showSharingStoppedPrompt
 } from './prompts'
+import { type Message, MessageType } from './types/Message'
 
-export let currentInvitationLink: string = ''
-
-enum MessageType {
-  StartSharing = 'start-sharing',
-  SharingActive = 'sharing-active',
-  StopSharing = 'stop-sharing'
-}
+export let currentInvitationLink = ''
 
 export const sendInvitationLink = async (
   invitationLink: string
 ): Promise<void> => {
   currentInvitationLink = invitationLink
+  const plugin = getPlugin()
+
   await plugin.conference.sendApplicationMessage({
     payload: {
       type: MessageType.StartSharing,
@@ -26,11 +25,13 @@ export const sendInvitationLink = async (
   })
 }
 
-export const notifySharingActive = async (
-  participantUuid: string
-): Promise<void> => {
-  console.log('Notifying sharing active')
-  console.log(participantUuid)
+export const notifySharingActive = (participantUuid: string): void => {
+  logger.info('Notifying sharing active')
+  logger.info(participantUuid)
+
+  const timeout = 2000
+  const plugin = getPlugin()
+
   setTimeout(async () => {
     await plugin.conference.sendApplicationMessage({
       participantUuid,
@@ -39,11 +40,13 @@ export const notifySharingActive = async (
         invitationLink: currentInvitationLink
       }
     })
-  }, 2000)
+  }, timeout)
 }
 
 export const sendStopSharingMessage = async (): Promise<void> => {
   currentInvitationLink = ''
+  const plugin = getPlugin()
+
   await plugin.conference.sendApplicationMessage({
     payload: {
       type: MessageType.StopSharing
@@ -51,20 +54,24 @@ export const sendStopSharingMessage = async (): Promise<void> => {
   })
 }
 
-export const handleApplicationMessages = async (event: any): Promise<void> => {
-  const message = event.message
+export const handleApplicationMessages = async (
+  applicationMessage: ApplicationMessage
+): Promise<void> => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We know the message is of type Message
+  const message = applicationMessage.message as unknown as Message
 
   switch (message.type) {
     case MessageType.StartSharing: {
-      currentInvitationLink = message.invitationLink
-      await stopSharingProject()
+      const { invitationLink } = message
+      currentInvitationLink = invitationLink ?? ''
+      stopSharingProject()
       await updateButton()
       await showReceivedInvitationPrompt(currentInvitationLink)
       break
     }
     case MessageType.SharingActive: {
-      console.log('Sharing active')
-      currentInvitationLink = message.invitationLink
+      logger.info('Sharing active')
+      currentInvitationLink = message.invitationLink ?? ''
       await updateButton()
       break
     }

@@ -4,10 +4,13 @@ import { handleApplicationMessages, notifySharingActive } from './messages'
 import { PopUpId } from './popUps'
 import { createButton } from './button/button'
 import { isSharing } from './collaboard/projects'
+import { logger } from './logger'
+
+const version = 0
 
 const plugin = await registerPlugin({
   id: 'plugin-collaboard',
-  version: 0
+  version
 })
 
 setPlugin(plugin)
@@ -23,9 +26,9 @@ window.plugin.popupManager.add(PopUpId.Whiteboard, (input) => {
 })
 
 plugin.events.applicationMessage.add(handleApplicationMessages)
-plugin.events.participantJoined.add(async (event) => {
-  console.log('Participant joined', event.participant)
+plugin.events.participantJoined.add((event) => {
+  logger.info('Participant joined', event.participant)
   if (isSharing) {
-    await notifySharingActive(event.participant.uuid)
+    notifySharingActive(event.participant.uuid)
   }
 })

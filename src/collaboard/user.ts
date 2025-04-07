@@ -1,9 +1,12 @@
 import { getAccessToken } from './auth'
 import { config } from '../config'
+import { HttpStatusCode } from '../types/HttpStatusCode'
+import type { UserInfo } from '../types/UserInfo'
+import type { GetUserResponse } from '../types/responses/GetUserResponse'
 
 const baseUrl: string = config.apiUrl
 
-export const getUserInfo = async (): Promise<any> => {
+export const getUserInfo = async (): Promise<UserInfo> => {
   const token = getAccessToken()
 
   const response = await fetch(
@@ -15,13 +18,14 @@ export const getUserInfo = async (): Promise<any> => {
     }
   )
 
-  if (response.status !== 200) {
+  if (response.status !== Number(HttpStatusCode.Ok)) {
     throw new Error('Failed to get user info')
   }
 
-  const data = await response.json()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
+  const data = (await response.json()) as GetUserResponse
 
-  const userInfo = data.Result
+  const { Result: userInfo } = data
 
   return userInfo
 }
