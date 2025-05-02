@@ -13,7 +13,7 @@ import type {
   GroupButtonPayload,
   ToolbarButtonPayload
 } from '@pexip/plugin-api'
-import { isSharing } from '../collaboard/projects'
+import { createOneTimeToken, isSharing } from '../collaboard/projects'
 import { getPlugin } from '../plugin'
 import {
   authenticated,
@@ -77,6 +77,15 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
   const group: GroupButtonPayload[] = []
 
   if (currentInvitationLink !== '') {
+    let oneTimeTokenParam = ''
+
+    try {
+      const oneTimeToken = await createOneTimeToken()
+      oneTimeTokenParam = `&oneTimeToken=${oneTimeToken}`
+    } catch (e) {
+      logger.error('Error creating one time token', e)
+    }
+
     group.push({
       id: ButtonGroupId.OpenWindow,
       icon: {
@@ -86,7 +95,7 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
       opensPopup: {
         id: PopUpId.Whiteboard,
         openParams: [
-          currentInvitationLink,
+          currentInvitationLink + oneTimeTokenParam,
           PopUpId.Whiteboard,
           PopUpOpts.Default
         ]
@@ -197,6 +206,8 @@ const handleButtonClick = async (event: {
     }
     case ButtonGroupId.OpenWindow: {
       focusPopUp(PopUpId.Whiteboard)
+      // Update the button to show the create a new oneTimeToken
+      await updateButton()
       break
     }
     case ButtonGroupId.StopSharing: {

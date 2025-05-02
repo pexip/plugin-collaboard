@@ -1,10 +1,15 @@
 import type { Prompt } from '@pexip/plugin-api'
 import { updateButton } from './button/button'
-import { logout } from './collaboard/auth'
-import { isSharing, stopSharingProject } from './collaboard/projects'
+import { authenticated, logout } from './collaboard/auth'
+import {
+  createOneTimeToken,
+  isSharing,
+  stopSharingProject
+} from './collaboard/projects'
 import { sendStopSharingMessage } from './messages'
 import { getPlugin } from './plugin'
 import { closePopUp, PopUpId, PopUpOpts } from './popUps'
+import { logger } from './logger'
 
 let currentPrompt: Prompt | null = null
 
@@ -14,6 +19,14 @@ export const showSharedWhiteboardPrompt = async (
   await currentPrompt?.remove()
 
   const plugin = getPlugin()
+
+  let oneTimeTokenParam = ''
+  try {
+    const oneTimeToken = await createOneTimeToken()
+    oneTimeTokenParam = `&oneTimeToken=${oneTimeToken}`
+  } catch (e) {
+    logger.error('Error creating one time token', e)
+  }
 
   currentPrompt = await plugin.ui.addPrompt({
     title: 'Whiteboard Shared',
@@ -25,7 +38,11 @@ export const showSharedWhiteboardPrompt = async (
     },
     opensPopup: {
       id: PopUpId.Whiteboard,
-      openParams: [invitationLink, PopUpId.Whiteboard, PopUpOpts.Default]
+      openParams: [
+        invitationLink + oneTimeTokenParam,
+        PopUpId.Whiteboard,
+        PopUpOpts.Default
+      ]
     }
   })
 
@@ -41,6 +58,16 @@ export const showReceivedInvitationPrompt = async (
 
   const plugin = getPlugin()
 
+  let oneTimeTokenParam = ''
+  if (authenticated) {
+    try {
+      const oneTimeToken = await createOneTimeToken()
+      oneTimeTokenParam = `&oneTimeToken=${oneTimeToken}`
+    } catch (e) {
+      logger.error('Error creating one time token', e)
+    }
+  }
+
   currentPrompt = await plugin.ui.addPrompt({
     title: 'Whiteboard Invitation',
     description:
@@ -51,7 +78,11 @@ export const showReceivedInvitationPrompt = async (
     },
     opensPopup: {
       id: PopUpId.Whiteboard,
-      openParams: [invitationLink, PopUpId.Whiteboard, PopUpOpts.Default]
+      openParams: [
+        invitationLink + oneTimeTokenParam,
+        PopUpId.Whiteboard,
+        PopUpOpts.Default
+      ]
     }
   })
 

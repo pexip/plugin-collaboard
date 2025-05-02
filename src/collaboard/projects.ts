@@ -8,6 +8,7 @@ import type { GetProjectResponse } from '../types/responses/GetProjectResponse'
 import type { ProjectInfo } from '../types/ProjectInfo'
 import type { CreateProjectResponse } from '../types/responses/CreateProjectResponse'
 import type { ShareProjectResponse } from '../types/responses/ShareProjectResponse'
+import type { CreateOneTimeTokenResponse } from '../types/responses/CreateOneTimeTokenResponse'
 
 const baseUrl: string = config.apiUrl
 const webappUrl: string = config.webappUrl
@@ -138,6 +139,28 @@ export const shareProject = async (
 
 export const stopSharingProject = (): void => {
   isSharing = false
+}
+
+export const createOneTimeToken = async (): Promise<string> => {
+  const token = getAccessToken()
+
+  const response = await fetch(
+    `${baseUrl}/public/api/public/v2.0/collaborationhub/auth/onetimetoken`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
+  if (response.status !== Number(HttpStatusCode.Ok)) {
+    const errorMessage = 'Failed to create one time token'
+    throw new Error(errorMessage)
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
+    const data = (await response.json()) as CreateOneTimeTokenResponse
+    return data.Result
+  }
 }
 
 const getErrorDescription = (code: number): string => {
