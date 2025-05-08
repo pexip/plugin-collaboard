@@ -19,6 +19,15 @@ const codeChallengeMethod = 'S256'
 
 let codeVerifier = ''
 
+let refreshTokenTimeoutId: number | undefined = undefined
+
+interface RequestTokenResponse {
+  access_token: string
+  refresh_token: string
+  expires_in: string
+  token_type: string
+}
+
 export let authenticated = false
 
 export const handleAuthResponse = async (code: string): Promise<void> => {
@@ -41,26 +50,9 @@ export const handleAuthResponse = async (code: string): Promise<void> => {
 
   if (response.status === Number(HttpStatusCode.Ok)) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
-    const data = (await response.json()) as {
-      access_token: string
-      refresh_token: string
-      expires_in: string
-      token_type: string
-    }
+    const data = (await response.json()) as RequestTokenResponse
 
-    const token: string = data.access_token
-    const refreshToken: string = data.refresh_token
-    const expiresIn: string = data.expires_in
-    const tokenType: string = data.token_type
-
-    localStorage.setItem(LocalStorageKey.AccessToken, token)
-    localStorage.setItem(LocalStorageKey.RefreshToken, refreshToken)
-    localStorage.setItem(LocalStorageKey.ExpiresIn, expiresIn)
-    localStorage.setItem(LocalStorageKey.TokenType, tokenType)
-
-    authenticated = true
-
-    await updateButton()
+    await handleTokenResponse(data)
 
     await plugin.ui.showToast({ message: 'Logged into Collaboard' })
   } else {
@@ -99,7 +91,69 @@ export const logout = async (): Promise<void> => {
   localStorage.removeItem(LocalStorageKey.ExpiresIn)
   localStorage.removeItem(LocalStorageKey.TokenType)
 
+  if (refreshTokenTimeoutId !== undefined) {
+    clearTimeout(refreshTokenTimeoutId)
+  }
+
   await plugin.ui.showToast({ message: 'Logged out from Collaboard' })
+}
+
+export const handleRefreshToken = async (): Promise<void> => {
+  logger.info('Refreshing token')
+  const refreshToken = localStorage.getItem(LocalStorageKey.RefreshToken)
+
+  if (refreshToken == null) {
+    return
+  }
+
+  const formBody = new URLSearchParams()
+
+  formBody.append('client_id', clientId)
+  formBody.append('grant_type', 'refresh_token')
+  formBody.append('refresh_token', refreshToken)
+
+  const response = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: formBody
+  })
+
+  if (response.status === Number(HttpStatusCode.Ok)) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
+    const data = (await response.json()) as RequestTokenResponse
+
+    await handleTokenResponse(data)
+  } else {
+    logger.error('Failed to refresh token')
+    authenticated = false
+  }
+}
+
+const handleTokenResponse = async (
+  data: RequestTokenResponse
+): Promise<void> => {
+  const token: string = data.access_token
+  const refreshToken: string = data.refresh_token
+  const expiresIn: string = data.expires_in
+  const tokenType: string = data.token_type
+
+  localStorage.setItem(LocalStorageKey.AccessToken, token)
+  localStorage.setItem(LocalStorageKey.RefreshToken, refreshToken)
+  localStorage.setItem(LocalStorageKey.ExpiresIn, expiresIn)
+  localStorage.setItem(LocalStorageKey.TokenType, tokenType)
+
+  authenticated = true
+
+  await updateButton()
+
+  const MILLISECONDS_IN_A_SECOND = 1000
+
+  refreshTokenTimeoutId = setTimeout(
+    handleRefreshToken,
+    Number(expiresIn) * MILLISECONDS_IN_A_SECOND
+  )
 }
 
 window.addEventListener(
@@ -119,5 +173,3 @@ window.addEventListener(
     }
   }
 )
-
-// TODO: Refresh token
