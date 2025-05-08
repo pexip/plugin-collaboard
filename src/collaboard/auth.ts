@@ -19,7 +19,7 @@ const codeChallengeMethod = 'S256'
 
 let codeVerifier = ''
 
-let refreshTokenTimeoutId: number | null = null
+let refreshTokenTimeoutId: number | undefined = undefined
 
 interface RequestTokenResponse {
   access_token: string
@@ -91,7 +91,7 @@ export const logout = async (): Promise<void> => {
   localStorage.removeItem(LocalStorageKey.ExpiresIn)
   localStorage.removeItem(LocalStorageKey.TokenType)
 
-  if (refreshTokenTimeoutId != null) {
+  if (refreshTokenTimeoutId !== undefined) {
     clearTimeout(refreshTokenTimeoutId)
   }
 
