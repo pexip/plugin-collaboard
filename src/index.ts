@@ -7,7 +7,7 @@ import { isSharing } from './collaboard/projects'
 import { logger } from './logger'
 import { handleRefreshToken } from './collaboard/auth'
 
-const version = 0
+const version = 1
 
 const plugin = await registerPlugin({
   id: 'plugin-collaboard',
