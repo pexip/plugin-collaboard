@@ -86,6 +86,37 @@ the redirections in the `manifest.json` file:
 }
 ```
 
+### Configuration requirements starting from Infinity v37
+
+The `id` of the plugin in the manifest should be `plugin-collaboard` to support
+the new Widget concept.
+
+In addition, because of the tightened security in v37,
+`"sandboxValues": ["allow-same-origin", "allow-popups", "allow-popups-to-escape-sandbox"]`
+needs to be added to the plugin config in the manifest.
+
+More information about the above change can be found here:
+https://developer.pexip.com/docs/infinity/web/plugins/webapp-3/sandbox-security
+
+Your manifest will now look something like the following.
+
+```
+{
+  ...
+  "plugins": [
+    {
+    	"id": "plugin-collaboard",
+    	"src": "...",
+      "sandboxValues": [
+        "allow-same-origin",
+        "allow-popups",
+        "allow-popups-to-escape-sandbox"
+      ]
+    }
+  ]
+}
+```
+
 ## How to configure the plugin
 
 This plugin uses the `config.json` file to store the configuration. You should
