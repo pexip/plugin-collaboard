@@ -18,7 +18,7 @@ export const getUserInfo = async (): Promise<UserInfo> => {
     }
   )
 
-  if (response.status !== Number(HttpStatusCode.Ok)) {
+  if (response.status !== HttpStatusCode.Ok.valueOf()) {
     throw new Error('Failed to get user info')
   }
 

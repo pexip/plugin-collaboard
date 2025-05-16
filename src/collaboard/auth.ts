@@ -48,7 +48,7 @@ export const handleAuthResponse = async (code: string): Promise<void> => {
     body: formBody
   })
 
-  if (response.status === Number(HttpStatusCode.Ok)) {
+  if (response.status === HttpStatusCode.Ok.valueOf()) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
     const data = (await response.json()) as RequestTokenResponse
 
@@ -120,7 +120,7 @@ export const handleRefreshToken = async (): Promise<void> => {
     body: formBody
   })
 
-  if (response.status === Number(HttpStatusCode.Ok)) {
+  if (response.status === HttpStatusCode.Ok.valueOf()) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
     const data = (await response.json()) as RequestTokenResponse
 
