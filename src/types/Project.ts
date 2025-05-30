@@ -1,5 +1,5 @@
 export interface Project {
-  ProjectId: string
+  ProjectId: number
   Description: string
   CanvasSizeRatio: number
   Type: number
