@@ -39,10 +39,10 @@ export const createProject = async (name: string): Promise<number> => {
     }
   )
 
-  if (response.status !== Number(HttpStatusCode.Ok)) {
+  if (response.status !== HttpStatusCode.Ok.valueOf()) {
     const errorMessage = 'Failed to create project'
 
-    if (response.status === Number(HttpStatusCode.BadRequest)) {
+    if (response.status === HttpStatusCode.BadRequest.valueOf()) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
       const data = (await response.json()) as CreateProjectResponse
       const { ErrorCode: error } = data
@@ -70,10 +70,10 @@ export const getProjects = async (): Promise<ProjectInfo[]> => {
     }
   )
 
-  if (response.status !== Number(HttpStatusCode.Ok)) {
+  if (response.status !== HttpStatusCode.Ok.valueOf()) {
     const errorMessage = 'Failed to get projects'
 
-    if (response.status === Number(HttpStatusCode.BadRequest)) {
+    if (response.status === HttpStatusCode.BadRequest.valueOf()) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
       const data = (await response.json()) as { ErrorCode: CollaboardErrorCode }
       const { ErrorCode: error } = data
@@ -118,10 +118,10 @@ export const shareProject = async (
     }
   )
 
-  if (response.status !== Number(HttpStatusCode.Ok)) {
+  if (response.status !== HttpStatusCode.Ok.valueOf()) {
     const errorMessage = 'Failed to share project'
 
-    if (response.status === Number(HttpStatusCode.BadRequest)) {
+    if (response.status === HttpStatusCode.BadRequest.valueOf()) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- We trust the response
       const data = (await response.json()) as { ErrorCode: CollaboardErrorCode }
       const { ErrorCode: error } = data
@@ -153,7 +153,7 @@ export const createOneTimeToken = async (): Promise<string> => {
       }
     }
   )
-  if (response.status !== Number(HttpStatusCode.Ok)) {
+  if (response.status !== HttpStatusCode.Ok.valueOf()) {
     const errorMessage = 'Failed to create one time token'
     throw new Error(errorMessage)
   } else {
