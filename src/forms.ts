@@ -83,7 +83,7 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
           options: projects.map((project: ProjectInfo) => {
             const { Project } = project
             const { ProjectId: id, Description: label } = Project
-            return { id, label }
+            return { id: id.toString(), label }
           })
         }
       },
