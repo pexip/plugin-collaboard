@@ -19,7 +19,7 @@ const codeChallengeMethod = 'S256'
 
 let codeVerifier = ''
 
-let refreshTokenTimeoutId: number | undefined = undefined
+let refreshTokenTimeoutId: ReturnType<typeof setTimeout> | undefined = undefined
 
 interface RequestTokenResponse {
   access_token: string
@@ -151,7 +151,9 @@ const handleTokenResponse = async (
   const MILLISECONDS_IN_A_SECOND = 1000
 
   refreshTokenTimeoutId = setTimeout(
-    handleRefreshToken,
+    () => {
+      handleRefreshToken().catch(logger.error)
+    },
     Number(expiresIn) * MILLISECONDS_IN_A_SECOND
   )
 }
