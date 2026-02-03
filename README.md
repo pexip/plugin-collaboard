@@ -134,6 +134,29 @@ folder of your plugin, if you are creating a package.
 
 ## Run for development
 
+- To be able to build the plugin, you need to comply with the following versions
+  or higher:
+
+  | NodeJS   | NPM     |
+  | -------- | ------- |
+  | v20.12.2 | v10.5.0 |
+
+- Create a file `.env` in the root of the project with the following content:
+
+```env
+VITE_INFINITY_TARGET=<infinity_url>
+VITE_DEV_SERVER_PORT=<dev_server_port>
+```
+
+The `VITE_INFINITY_TARGET` variable is **mandatory** and should contain the URL
+of the Pexip Infinity system where you want to test the plugin.
+
+The `VITE_DEV_SERVER_PORT` variable is an optional variable used to specify the
+port on which the development server will run. If not provided, it defaults to
+`5173`.
+
+You can check an example in the provided `.env.example` file.
+
 - Install all the dependencies:
 
 ```bash

@@ -32,14 +32,16 @@ export const notifySharingActive = (participantUuid: string): void => {
   const timeout = 2000
   const plugin = getPlugin()
 
-  setTimeout(async () => {
-    await plugin.conference.sendApplicationMessage({
-      participantUuid,
-      payload: {
-        type: MessageType.SharingActive,
-        invitationLink: currentInvitationLink
-      }
-    })
+  setTimeout(() => {
+    plugin.conference
+      .sendApplicationMessage({
+        participantUuid,
+        payload: {
+          type: MessageType.SharingActive,
+          invitationLink: currentInvitationLink
+        }
+      })
+      .catch(logger.error)
   }, timeout)
 }
 
