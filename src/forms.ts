@@ -6,6 +6,9 @@ import { getPlugin } from './plugin'
 import { showSharedWhiteboardPrompt } from './prompts'
 import type { ProjectInfo } from './types/ProjectInfo'
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- Using unknown to avoid type issues
+let currentForm: unknown | null = null
+
 export const showCreateWhiteboardForm = async (): Promise<void> => {
   const plugin = getPlugin()
 
@@ -35,6 +38,8 @@ export const showCreateWhiteboardForm = async (): Promise<void> => {
       submitBtnTitle: 'Create'
     }
   })
+
+  currentForm = form
 
   form.onInput.add(async (event) => {
     await form.remove()
@@ -91,6 +96,8 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
     }
   })
 
+  currentForm = form
+
   form.onInput.add(async (event) => {
     await form.remove()
 
@@ -107,4 +114,9 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
       await plugin.ui.showToast({ message: (e as Error).message })
     }
   })
+}
+
+export const closeCurrentForm = async (): Promise<void> => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- currentForm has remove method
+  await (currentForm as { remove: () => Promise<void> } | null)?.remove()
 }

@@ -196,3 +196,7 @@ export const showLogoutPrompt = async (): Promise<void> => {
     }
   })
 }
+
+export const closeCurrentPrompt = async (): Promise<void> => {
+  await currentPrompt?.remove()
+}

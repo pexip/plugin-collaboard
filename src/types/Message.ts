@@ -7,4 +7,5 @@ export enum MessageType {
 export interface Message {
   type: MessageType
   invitationLink?: string
+  sharingParticipantUUID?: string
 }
