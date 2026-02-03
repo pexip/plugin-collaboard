@@ -94,6 +94,11 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
   form.onInput.add(async (event) => {
     await form.remove()
 
+    const empty = 0
+    if (Object.keys(event).length === empty) {
+      return
+    }
+
     const { project: projectId } = event
 
     try {
