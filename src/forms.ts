@@ -6,8 +6,11 @@ import { getPlugin } from './plugin'
 import { showSharedWhiteboardPrompt } from './prompts'
 import type { ProjectInfo } from './types/ProjectInfo'
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- Using unknown to avoid type issues
-let currentForm: unknown | null = null
+let currentForm: Form | null = null
+
+interface Form {
+  remove: () => Promise<void>
+}
 
 export const showCreateWhiteboardForm = async (): Promise<void> => {
   const plugin = getPlugin()
@@ -117,6 +120,5 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
 }
 
 export const closeCurrentForm = async (): Promise<void> => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- currentForm has remove method
-  await (currentForm as { remove: () => Promise<void> } | null)?.remove()
+  await currentForm?.remove()
 }
