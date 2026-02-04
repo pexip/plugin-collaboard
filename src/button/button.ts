@@ -139,7 +139,7 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
           opensPopup: {
             id: PopUpId.ManageWhiteboards,
             openParams: [
-              `${webappUrl}/projects`,
+              `${webappUrl}/authenticate?redirect=project&oneTimeToken=${await createOneTimeToken()}`,
               PopUpId.ManageWhiteboards,
               PopUpOpts.Default
             ]
