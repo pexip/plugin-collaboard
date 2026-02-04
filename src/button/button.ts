@@ -26,10 +26,10 @@ import {
   showStopSharingPrompt
 } from '../prompts'
 import { showOpenWhiteboardForm, showCreateWhiteboardForm } from '../forms'
-import { currentInvitationLink } from '../messages'
 import { focusPopUp, PopUpId, PopUpOpts } from '../popUps'
 import { config } from '../config'
 import { logger } from '../logger'
+import { getCurrentInvitation } from '../currentInvitation'
 
 export enum ButtonGroupId {
   Login = 'login',
@@ -67,7 +67,7 @@ export const updateButton = async (): Promise<void> => {
   button
     ?.update({
       group: await getButtonGroup(),
-      isActive: currentInvitationLink !== '',
+      isActive: getCurrentInvitation() !== '',
       ...baseButtonPayload
     })
     .catch(logger.error)
@@ -76,7 +76,7 @@ export const updateButton = async (): Promise<void> => {
 const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
   const group: GroupButtonPayload[] = []
 
-  if (currentInvitationLink !== '') {
+  if (getCurrentInvitation() !== '') {
     let oneTimeTokenParam = ''
 
     try {
@@ -95,7 +95,7 @@ const getButtonGroup = async (): Promise<GroupButtonPayload[]> => {
       opensPopup: {
         id: PopUpId.Whiteboard,
         openParams: [
-          currentInvitationLink + oneTimeTokenParam,
+          getCurrentInvitation() + oneTimeTokenParam,
           PopUpId.Whiteboard,
           PopUpOpts.Default
         ]
@@ -185,7 +185,7 @@ const handleButtonClick = async (event: {
       break
     }
     case ButtonGroupId.CreateWhiteboard: {
-      if (currentInvitationLink !== '') {
+      if (getCurrentInvitation() !== '') {
         await showAnotherUserSharingPrompt(showCreateWhiteboardForm)
       } else {
         await showCreateWhiteboardForm()
@@ -193,7 +193,7 @@ const handleButtonClick = async (event: {
       break
     }
     case ButtonGroupId.OpenWhiteboard: {
-      if (currentInvitationLink !== '') {
+      if (getCurrentInvitation() !== '') {
         await showAnotherUserSharingPrompt(showOpenWhiteboardForm)
       } else {
         await showOpenWhiteboardForm()

@@ -6,6 +6,12 @@ import { getPlugin } from './plugin'
 import { showSharedWhiteboardPrompt } from './prompts'
 import type { ProjectInfo } from './types/ProjectInfo'
 
+let currentForm: Form | null = null
+
+interface Form {
+  remove: () => Promise<void>
+}
+
 export const showCreateWhiteboardForm = async (): Promise<void> => {
   const plugin = getPlugin()
 
@@ -35,6 +41,8 @@ export const showCreateWhiteboardForm = async (): Promise<void> => {
       submitBtnTitle: 'Create'
     }
   })
+
+  currentForm = form
 
   form.onInput.add(async (event) => {
     await form.remove()
@@ -91,6 +99,8 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
     }
   })
 
+  currentForm = form
+
   form.onInput.add(async (event) => {
     await form.remove()
 
@@ -107,4 +117,8 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
       await plugin.ui.showToast({ message: (e as Error).message })
     }
   })
+}
+
+export const closeCurrentForm = async (): Promise<void> => {
+  await currentForm?.remove()
 }

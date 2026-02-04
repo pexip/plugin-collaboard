@@ -2,10 +2,18 @@ import { registerPlugin } from '@pexip/plugin-api'
 import { setPlugin } from './plugin'
 import { handleApplicationMessages, notifySharingActive } from './messages'
 import { PopUpId } from './popUps'
-import { createButton } from './button/button'
-import { isSharing } from './collaboard/projects'
+import { createButton, updateButton } from './button/button'
+import { isSharing, stopSharingProject } from './collaboard/projects'
 import { logger } from './logger'
 import { handleRefreshToken } from './collaboard/auth'
+import { closeCurrentPrompt, showSharingStoppedPrompt } from './prompts'
+import { closeCurrentForm } from './forms'
+import { setCurrentInvitation } from './currentInvitation'
+import {
+  getSharingParticipantUUID,
+  setSharingParticipantUUID
+} from './sharingParticipantUUID'
+import { setMe } from './me'
 
 const version = 1
 
@@ -29,9 +37,37 @@ window.plugin.popupManager.add(PopUpId.Whiteboard, (input) => {
 })
 
 plugin.events.applicationMessage.add(handleApplicationMessages)
+
+plugin.events.me.add((event) => {
+  setMe(event.participant)
+})
+
+plugin.events.connected.add(async () => {
+  setCurrentInvitation('')
+  setSharingParticipantUUID('')
+  stopSharingProject()
+  await updateButton()
+})
+
 plugin.events.participantJoined.add((event) => {
   logger.info('Participant joined', event.participant)
   if (isSharing) {
     notifySharingActive(event.participant.uuid)
   }
+})
+
+plugin.events.participantLeft.add(async (event) => {
+  if (!isSharing && event.participant.uuid === getSharingParticipantUUID()) {
+    setCurrentInvitation('')
+    setSharingParticipantUUID('')
+    await closeCurrentPrompt()
+    await closeCurrentForm()
+    await updateButton()
+    await showSharingStoppedPrompt()
+  }
+})
+
+plugin.events.disconnected.add(async () => {
+  await closeCurrentPrompt()
+  await closeCurrentForm()
 })

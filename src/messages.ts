@@ -8,19 +8,21 @@ import {
   showSharingStoppedPrompt
 } from './prompts'
 import { type Message, MessageType } from './types/Message'
-
-export let currentInvitationLink = ''
+import { getCurrentInvitation, setCurrentInvitation } from './currentInvitation'
+import { setSharingParticipantUUID } from './sharingParticipantUUID'
+import { getMe } from './me'
 
 export const sendInvitationLink = async (
   invitationLink: string
 ): Promise<void> => {
-  currentInvitationLink = invitationLink
+  setCurrentInvitation(invitationLink)
   const plugin = getPlugin()
 
   await plugin.conference.sendApplicationMessage({
     payload: {
       type: MessageType.StartSharing,
-      invitationLink
+      invitationLink,
+      sharingParticipantUUID: getMe().uuid
     }
   })
 }
@@ -38,7 +40,8 @@ export const notifySharingActive = (participantUuid: string): void => {
         participantUuid,
         payload: {
           type: MessageType.SharingActive,
-          invitationLink: currentInvitationLink
+          invitationLink: getCurrentInvitation(),
+          sharingParticipantUUID: getMe().uuid
         }
       })
       .catch(logger.error)
@@ -46,7 +49,8 @@ export const notifySharingActive = (participantUuid: string): void => {
 }
 
 export const sendStopSharingMessage = async (): Promise<void> => {
-  currentInvitationLink = ''
+  setCurrentInvitation('')
+  setSharingParticipantUUID('')
   const plugin = getPlugin()
 
   await plugin.conference.sendApplicationMessage({
@@ -65,20 +69,23 @@ export const handleApplicationMessages = async (
   switch (message.type) {
     case MessageType.StartSharing: {
       const { invitationLink } = message
-      currentInvitationLink = invitationLink ?? ''
+      setCurrentInvitation(invitationLink ?? '')
+      setSharingParticipantUUID(message.sharingParticipantUUID ?? '')
       stopSharingProject()
       await updateButton()
-      await showReceivedInvitationPrompt(currentInvitationLink)
+      await showReceivedInvitationPrompt(getCurrentInvitation())
       break
     }
     case MessageType.SharingActive: {
       logger.info('Sharing active')
-      currentInvitationLink = message.invitationLink ?? ''
+      setCurrentInvitation(message.invitationLink ?? '')
+      setSharingParticipantUUID(message.sharingParticipantUUID ?? '')
       await updateButton()
       break
     }
     case MessageType.StopSharing: {
-      currentInvitationLink = ''
+      setCurrentInvitation('')
+      setSharingParticipantUUID('')
       await updateButton()
       await showSharingStoppedPrompt()
       break
