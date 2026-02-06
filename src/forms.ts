@@ -94,12 +94,12 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
   form.onInput.add(async (event) => {
     await form.remove()
 
-    const empty = 0
-    if (Object.keys(event).length === empty) {
+    const { project: projectId } = event
+
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions -- projectId can be 'undefined' or empty string, which are falsy values
+    if (!projectId) {
       return
     }
-
-    const { project: projectId } = event
 
     try {
       const writable = false
