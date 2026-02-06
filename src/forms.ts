@@ -106,6 +106,11 @@ export const showOpenWhiteboardForm = async (): Promise<void> => {
 
     const { project: projectId } = event
 
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions -- projectId can be 'undefined' or empty string, which are falsy values
+    if (!projectId) {
+      return
+    }
+
     try {
       const writable = false
       const invitationLink = await shareProject(Number(projectId), writable)
