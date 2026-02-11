@@ -202,6 +202,8 @@ const handleButtonClick = async (event: {
     }
     case ButtonGroupId.ManageWhiteboards: {
       focusPopUp(PopUpId.ManageWhiteboards)
+      // Update the button to show the create a new oneTimeToken
+      await updateButton()
       break
     }
     case ButtonGroupId.OpenWindow: {
