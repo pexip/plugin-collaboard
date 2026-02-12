@@ -31,7 +31,7 @@ export const showSharedWhiteboardPrompt = async (
   currentPrompt = await plugin.ui.addPrompt({
     title: 'Whiteboard Shared',
     description:
-      'You have shared the whiteboard. Do you want to open the it in a new window?',
+      'You have shared the whiteboard. Do you want to open the whiteboard in a new window?',
     prompt: {
       primaryAction: 'Open',
       secondaryAction: 'Cancel'
